@@ -31,7 +31,7 @@
 #include "merc.h"
 #include "olc.h"
 
-char buf[MAX_STRING_LENGTH];
+extern char buf[MAX_STRING_LENGTH];
 
 /*
  * Local functions.

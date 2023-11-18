@@ -39,7 +39,7 @@ MOB_INDEX_DATA *mob_index_free;
 RESET_DATA *reset_free;
 HELP_DATA *help_free;
 
-HELP_DATA *help_last;
+extern HELP_DATA *help_last;
 
 TODO_DATA *todo_free;
 TODO_DATA *todo_last;
