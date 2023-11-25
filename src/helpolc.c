@@ -128,7 +128,7 @@ void helpsedit(CHAR_DATA *ch, char *argument)
 
 	smash_tilde(argument);
 	strncpy(arg, argument, sizeof(arg) - 1);
-	arg[sizeof(arg)] = '\0';
+	arg[sizeof(arg) - 1] = '\0';
 	argument = one_argument(argument, command);
 
 	pHelp = (HELP_DATA *)ch->desc->pEdit;
@@ -136,23 +136,27 @@ void helpsedit(CHAR_DATA *ch, char *argument)
 	if (!str_cmp(command, "done")) {
 		edit_done(ch);
 		do_asave(ch, "helps");
+
 		return;
 	}
 
 	if (get_trust(ch) < HELP_EDIT_LEVEL) {
 		send_to_char("Insufficient security to modify helps.\n\r", ch);
 		interpret(ch, arg);
+
 		return;
 	}
 
 	if (command[0] == '\0') {
 		helpsedit_show(ch, argument);
+
 		return;
 	}
 
 	if (!pHelp) {
 		send_to_char("You are not currently editing a help.\n\r", ch);
 		interpret(ch, arg);
+
 		return;
 	}
 
@@ -169,6 +173,7 @@ void helpsedit(CHAR_DATA *ch, char *argument)
 
 	/* If command not found, default to the standard interpreter. */
 	interpret(ch, arg);
+
 	return;
 }
 
@@ -183,8 +188,7 @@ bool helpsedit_show(CHAR_DATA *ch, char *argument)
 	} else {
 		printf_to_char(ch, "Keywords:             %s\n\r", pHelp->keyword);
 		printf_to_char(ch, "Level: %d\n\r", pHelp->level);
-		printf_to_char(ch,
-									 "Text: Type text to see the text (Some are VERY long, so they are not shown here.)");
+		printf_to_char(ch, "Text: Type text to see the text (Some are VERY long, so they are not shown here.)");
 	}
 
 	return FALSE;
@@ -196,6 +200,7 @@ bool helpsedit_create(CHAR_DATA *ch, char *argument)
 
 	if (!pHelp) {
 		send_to_char("ERROR!  Could not create a new help!\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -222,11 +227,13 @@ bool helpsedit_keyword(CHAR_DATA *ch, char *argument)
 
 	if (!pHelp) {
 		send_to_char("You are not currently editing a help.\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (argument[0] == '\0') {
 		send_to_char("Syntax:  keyword <keywords for this help>\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -258,19 +265,21 @@ bool helpsedit_level(CHAR_DATA *ch, char *argument)
 
 	if (!pHelp) {
 		send_to_char("You are not currently editing a help.\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (argument[0] == '\0' || !is_number(argument)) {
 		send_to_char("Syntax:  level [number]\n\r", ch);
+
 		return FALSE;
 	}
 
 	pHelp->level = atoi(argument);
 
 	send_to_char("Level set.\n\r", ch);
-	return TRUE;
 
+	return TRUE;
 }
 
 bool helpsedit_text(CHAR_DATA *ch, char *argument)
@@ -281,13 +290,17 @@ bool helpsedit_text(CHAR_DATA *ch, char *argument)
 
 	if (!pHelp) {
 		send_to_char("You are not currently editing a help.\n\r", ch);
+
 		return FALSE;
 	}
+
 	if (argument[0] == '\0') {
 		string_append(ch, &pHelp->text);
+
 		return TRUE;
 	}
 
 	send_to_char("Syntax:  text    (No arguments allowed)\n\r", ch);
+
 	return FALSE;
 }
