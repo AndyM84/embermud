@@ -1003,7 +1003,6 @@ void do_asave(CHAR_DATA *ch, char *argument)
 {
 	char arg[MAX_INPUT_LENGTH];
 	AREA_DATA *pArea;
-	FILE *fp;
 	int value;
 	bool changed;
 
@@ -1012,15 +1011,14 @@ void do_asave(CHAR_DATA *ch, char *argument)
 		return;
 	}
 
-	fp = NULL;
-
-	if (!ch)                  /* Do an autosave */
-	{
+	if (!ch) {                 /* Do an autosave */
 		save_area_list();
+
 		for (pArea = area_first; pArea; pArea = pArea->next) {
 			save_area(pArea);
 			REMOVE_BIT(pArea->area_flags, AREA_CHANGED);
 		}
+
 		return;
 	}
 
@@ -1067,10 +1065,13 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (is_number(arg)) {
 		if (!IS_BUILDER(ch, pArea)) {
 			send_to_char("You are not a builder for this area.\n\r", ch);
+
 			return;
 		}
+
 		save_area_list();
 		save_area(pArea);
+
 		return;
 	}
 
@@ -1079,6 +1080,7 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (!str_cmp("factions", arg)) {
 		save_factions();
 		send_to_char("Factions file saved!\n\r", ch);;
+
 		return;
 	}
 
@@ -1087,6 +1089,7 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (!str_cmp("socials", arg)) {
 		save_socials();
 		send_to_char("Socials file saved!\n\r", ch);;
+
 		return;
 	}
 
@@ -1095,6 +1098,7 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (!str_prefix("clans", arg)) {
 		save_clans();
 		send_to_char("Clans file saved!\n\r", ch);
+
 		return;
 	}
 
@@ -1104,6 +1108,7 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (!str_prefix("help", arg)) {
 		save_helps();
 		send_to_char("Help file saved!\n\r", ch);
+
 		return;
 	}
 	/* Save the TODO file */
@@ -1111,24 +1116,24 @@ void do_asave(CHAR_DATA *ch, char *argument)
 	if (!str_prefix("todo", arg)) {
 		save_todo();
 		send_to_char("TODO file saved!\n\r", ch);
+
 		return;
 	}
 
 	/* Save the mudprogs file */
 	/*------------------- */
 
-	if (!str_cmp("mudprogs", arg) || !str_cmp("progs", arg)
-			|| !str_cmp("mprogs", arg)) {
+	if (!str_cmp("mudprogs", arg) || !str_cmp("progs", arg) || !str_cmp("mprogs", arg)) {
 		save_mudprogs();
 		send_to_char("MudProgs file saved!\n\r", ch);
+
 		return;
 	}
 
 	/* Save the world, only authorized areas. */
 	/* -------------------------------------- */
 
-	if ((!str_cmp("world", arg) || !str_cmp("all", arg))
-			&& IS_IMMORTAL(ch)) {
+	if ((!str_cmp("world", arg) || !str_cmp("all", arg)) && IS_IMMORTAL(ch)) {
 		save_area_list();
 		save_todo();
 		save_mudprogs();
@@ -1136,16 +1141,19 @@ void do_asave(CHAR_DATA *ch, char *argument)
 		save_factions();
 		save_socials();
 		save_helps();
+
 		for (pArea = area_first; pArea; pArea = pArea->next) {
 				/* Builder must be assigned this area. */
-			if (!IS_BUILDER(ch, pArea))
+			if (!IS_BUILDER(ch, pArea)) {
 				continue;
+			}
 
 			save_area(pArea);
 			REMOVE_BIT(pArea->area_flags, AREA_CHANGED);
 		}
 
 		send_to_char("You saved the world.\n\r", ch);
+
 		return;
 	}
 
@@ -1166,21 +1174,26 @@ void do_asave(CHAR_DATA *ch, char *argument)
 
 		for (pArea = area_first; pArea; pArea = pArea->next) {
 				/* Builder must be assigned this area. */
-			if ((ch->Class != 4) && (!IS_BUILDER(ch, pArea)))
+			if ((ch->Class != 4) && (!IS_BUILDER(ch, pArea))) {
 				continue;
+			}
 
 		/* Save changed areas. */
 			if (IS_SET(pArea->area_flags, AREA_CHANGED)) {
 				save_area(pArea);
-				if (ch->Class != 4)
-					printf_to_char(ch, "%24s - '%s'\n\r", pArea->name,
-												 pArea->filename);
+				
+				if (ch->Class != 4) {
+					printf_to_char(ch, "%24s - '%s'\n\r", pArea->name, pArea->filename);
+				}
+
 				REMOVE_BIT(pArea->area_flags, AREA_CHANGED);
 				changed = TRUE;
 			}
 		}
-		if ((!changed) && (ch->Class != 4))
+
+		if ((!changed) && (ch->Class != 4)) {
 			send_to_char("None.\n\r", ch);
+		}
 
 		return;
 	}
