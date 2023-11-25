@@ -983,7 +983,6 @@ void skip_section(FILE *fp, char *section)
 		if ( !str_cmp( word, literal ) )    \
 		{                                   \
 		    field  = value;                 \
-		    fMatch = TRUE;                  \
 		    break;                          \
 				}
 
@@ -992,7 +991,6 @@ void skip_section(FILE *fp, char *section)
 		{                                   \
 		    free_string( &field );           \
 		    field = fread_string( fp );     \
-		    fMatch = TRUE;                  \
 		    break;                          \
 				}
 
@@ -1011,7 +1009,6 @@ void load_area(FILE *fp)
 	AREA_DATA *pArea;
 	AREA_DATA *pTempArea;
 	char *word = NULL;
-	bool fMatch;
 
 	pArea = alloc_perm(sizeof(*pArea));
 	pArea->age = 15;
@@ -1028,54 +1025,61 @@ void load_area(FILE *fp)
 
 	for (;; ) {
 		word = feof(fp) ? "End" : fread_word(fp);
-		fMatch = FALSE;
 
 		switch (UPPER(word[0])) {
 		case 'N':
 			SKEY("Name", pArea->name);
+
 			break;
+
 		case 'S':
 			KEY("Security", pArea->security, fread_number(fp));
+
 			break;
+
 		case 'V':
 			if (!str_cmp(word, "VNUMs")) {
 				pArea->lvnum = fread_number(fp);
 				pArea->uvnum = fread_number(fp);
-
 			}
+
 			break;
+
 		case 'E':
 			if (!str_cmp(word, "End")) {
-				fMatch = TRUE;
-				if (area_first == NULL)
+				if (area_first == NULL) {
 					area_first = pArea;
-				if (area_last != NULL)
+				}
+				
+				if (area_last != NULL) {
 					area_last->next = pArea;
+				}
+
 				area_last = pArea;
 				pArea->next = NULL;
 				top_area++;
 
 				/* Check to ensure we have unique vnums. */
-				for (pTempArea = area_first; pTempArea;
-						 pTempArea = pTempArea->next)
-					if (pTempArea->vnum != pArea->vnum
-							&&
-							((pArea->lvnum >= pTempArea->lvnum
-								&& pArea->lvnum <= pTempArea->uvnum)
-							 || (pArea->uvnum >= pTempArea->lvnum
-									 && pArea->uvnum <= pTempArea->uvnum))) {
+				for (pTempArea = area_first; pTempArea; pTempArea = pTempArea->next) {
+					if (pTempArea->vnum != pArea->vnum && ((pArea->lvnum >= pTempArea->lvnum && pArea->lvnum <= pTempArea->uvnum) || (pArea->uvnum >= pTempArea->lvnum && pArea->uvnum <= pTempArea->uvnum))) {
 						bug("Overlapping vnum range!", pArea->name);
+
 						#if defined(cbuilder)
 						return -1;
 						#else
 						exit(1);
 						#endif
 					}
+				}
+
 				return;
 			}
+
 			break;
+
 		case 'B':
 			SKEY("Builders", pArea->builders);
+
 			break;
 /* removed for ROM OLC
 			case 'R':
@@ -2782,20 +2786,26 @@ char *fread_word(FILE *fp)
 
 	for (; pword < word + MAX_INPUT_LENGTH; pword++) {
 		*pword = getc(fp);
+
 		if (cEnd == ' ' ? isspace(*pword) : *pword == cEnd) {
-			if (cEnd == ' ')
+			if (cEnd == ' ') {
 				ungetc(*pword, fp);
+			}
+
 			*pword = '\0';
-			return word;
+			
+			return (char *)word;
 		}
 	}
 
 	bug("Fread_word: word too long.", 0);
+
 	#if defined(cbuilder)
 	return -1;
 	#else
 	exit(1);
 	#endif
+
 	return NULL;
 }
 
@@ -3108,92 +3118,147 @@ void do_dump(CHAR_DATA *ch, char *argument)
 	aff_count = 0;
 
 	/* mobile prototypes */
-	fprintf(fp, "MobProt	%4d (%8d bytes)\n",
-					top_mob_index, top_mob_index * (sizeof(*pMobIndex)));
+	fprintf(
+		fp,
+		"MobProt	%4d (%8d bytes)\n",
+			top_mob_index,
+			(int)(top_mob_index * (sizeof(*pMobIndex)))
+	);
 
  /* mobs */
 	count = 0;
 	count2 = 0;
+	
 	for (fch = char_list; fch != NULL; fch = fch->next) {
 		count++;
-		if (fch->pcdata != NULL)
+		
+		if (fch->pcdata != NULL) {
 			num_pcs++;
-		for (af = fch->affected; af != NULL; af = af->next)
+		}
+		
+		for (af = fch->affected; af != NULL; af = af->next) {
 			aff_count++;
-		for (naf = fch->newaffected; naf != NULL; naf = naf->next)
+		}
+	
+		for (naf = fch->newaffected; naf != NULL; naf = naf->next) {
 			aff_count++;
+		}
 	}
-	for (fch = char_free; fch != NULL; fch = fch->next)
+	
+	for (fch = char_free; fch != NULL; fch = fch->next) {
 		count2++;
+	}
 
-	fprintf(fp, "Mobs	%4d (%8d bytes), %2d free (%d bytes)\n",
-					count, count * (sizeof(*fch)), count2,
-					count2 * (sizeof(*fch)));
+	fprintf(
+		fp,
+		"Mobs	%4d (%8d bytes), %2d free (%d bytes)\n",
+			count,
+			(int)(count * (sizeof(*fch))),
+			count2,
+			(int)(count2 * (sizeof(*fch)))
+	);
 
  /* pcdata */
 	count = 0;
-	for (pc = pcdata_free; pc != NULL; pc = pc->next)
+	
+	for (pc = pcdata_free; pc != NULL; pc = pc->next) {
 		count++;
+	}
 
-	fprintf(fp, "Pcdata	%4d (%8d bytes), %2d free (%d bytes)\n",
-					num_pcs, num_pcs * (sizeof(*pc)), count,
-					count * (sizeof(*pc)));
+	fprintf(
+		fp,
+		"Pcdata	%4d (%8d bytes), %2d free (%d bytes)\n",
+			num_pcs,
+			(int)(num_pcs * (sizeof(*pc))),
+			count,
+			(int)(count * (sizeof(*pc)))
+	);
 
  /* descriptors */
 	count = 0;
 	count2 = 0;
-	for (d = descriptor_list; d != NULL; d = d->next)
+	
+	for (d = descriptor_list; d != NULL; d = d->next) {
 		count++;
-	for (d = descriptor_free; d != NULL; d = d->next)
+	}
+	
+	for (d = descriptor_free; d != NULL; d = d->next) {
 		count2++;
+	}
 
-	fprintf(fp, "Descs	%4d (%8d bytes), %2d free (%d bytes)\n",
-					count, count * (sizeof(*d)), count2,
-					count2 * (sizeof(*d)));
+	fprintf(
+		fp,
+		"Descs	%4d (%8d bytes), %2d free (%d bytes)\n",
+			count,
+			(int)(count * (sizeof(*d))),
+			count2,
+			(int)(count2 * (sizeof(*d)))
+	);
 
  /* object prototypes */
-	for (vnum = 0; nMatch < top_obj_index; vnum++)
+	for (vnum = 0; nMatch < top_obj_index; vnum++) {
 		if ((pObjIndex = get_obj_index(vnum)) != NULL) {
-			for (af = pObjIndex->affected; af != NULL; af = af->next)
+			for (af = pObjIndex->affected; af != NULL; af = af->next) {
 				aff_count++;
+			}
+		
 			nMatch++;
 		}
+	}
 
-	fprintf(fp, "ObjProt	%4d (%8d bytes)\n",
-					top_obj_index, top_obj_index * (sizeof(*pObjIndex)));
+	fprintf(
+		fp,
+		"ObjProt	%4d (%8d bytes)\n",
+			top_obj_index,
+			(int)(top_obj_index * (sizeof(*pObjIndex)))
+	);
 
  /* objects */
 	count = 0;
 	count2 = 0;
+	
 	for (obj = object_list; obj != NULL; obj = obj->next) {
 		count++;
-		for (af = obj->affected; af != NULL; af = af->next)
+	
+		for (af = obj->affected; af != NULL; af = af->next) {
 			aff_count++;
+		}
 	}
-	for (obj = obj_free; obj != NULL; obj = obj->next)
+	
+	for (obj = obj_free; obj != NULL; obj = obj->next) {
 		count2++;
+	}
 
-	fprintf(fp, "Objs	%4d (%8d bytes), %2d free (%d bytes)\n",
-					count, count * (sizeof(*obj)), count2,
-					count2 * (sizeof(*obj)));
+	fprintf(
+		fp,
+		"Objs	%4d (%8d bytes), %2d free (%d bytes)\n",
+			count,
+			(int)(count * (sizeof(*obj))),
+			count2,
+			(int)(count2 * (sizeof(*obj)))
+	);
 
  /* affects */
 	count = 0;
-	for (af = affect_free; af != NULL; af = af->next)
+	
+	for (af = affect_free; af != NULL; af = af->next) {
 		count++;
+	}
 
-	fprintf(fp,
-					"Affects	%4d (%8d bytes), %2d free (%d bytes) New Affects not yet included\n",
-					aff_count, aff_count * (sizeof(*af)), count,
-					count * (sizeof(*af)));
+	fprintf(
+		fp,
+		"Affects	%4d (%8d bytes), %2d free (%d bytes) New Affects not yet included\n",
+			aff_count,
+			(int)(aff_count * (sizeof(*af))),
+			count,
+			(int)(count * (sizeof(*af)))
+	);
 
  /* rooms */
-	fprintf(fp, "Rooms	%4d (%8d bytes)\n",
-					top_room, top_room * (sizeof(ROOM_INDEX_DATA)));
+	fprintf(fp, "Rooms	%4d (%8d bytes)\n", top_room, (int)(top_room * (sizeof(ROOM_INDEX_DATA))));
 
  /* exits */
-	fprintf(fp, "Exits	%4d (%8d bytes)\n",
-					top_exit, top_exit * (sizeof(EXIT_DATA)));
+	fprintf(fp, "Exits	%4d (%8d bytes)\n", top_exit, (int)(top_exit * (sizeof(EXIT_DATA))));
 
 	fclose(fp);
 
@@ -3204,13 +3269,20 @@ void do_dump(CHAR_DATA *ch, char *argument)
 	fprintf(fp, "\nMobile Analysis\n");
 	fprintf(fp, "---------------\n");
 	nMatch = 0;
-	for (vnum = 0; nMatch < top_mob_index; vnum++)
+
+	for (vnum = 0; nMatch < top_mob_index; vnum++) {
 		if ((pMobIndex = get_mob_index(vnum)) != NULL) {
 			nMatch++;
-			fprintf(fp, "#%-4d %3d active %3d killed     %s\n",
-							pMobIndex->vnum, pMobIndex->count,
-							pMobIndex->killed, pMobIndex->short_descr);
+
+			fprintf(
+				fp,
+				"#%-4d %3d active %3d killed     %s\n",
+					pMobIndex->vnum, pMobIndex->count,
+					pMobIndex->killed, pMobIndex->short_descr
+			);
 		}
+	}
+
 	fclose(fp);
 	fflush(fp);
 
@@ -4300,18 +4372,16 @@ char *get_config_value(char *inbuf, char *outbuf)
 void load_progs(FILE *fp)
 {
 	MPROG_DATA *pMudProg;
-	MPROG_LIST *pMprogList;
 	MPROG_GROUP *pMprogGroup;
-	MPROG_GROUP_LIST *pMprogGroupList;
 	MOB_INDEX_DATA *pMobIndex;
 	OBJ_INDEX_DATA *pObjIndex;
 	ROOM_INDEX_DATA *pRoomIndex;
-	int iFound;
 	int progvnum;
 	int targetvnum;
 
 	if (!area_last) {
 		bug("Load_Progs: no #AREA seen yet.", 0);
+
 		#if defined(cbuilder)
 		return -1;
 		#else
@@ -4322,11 +4392,13 @@ void load_progs(FILE *fp)
 	for (;; ) {
 		char letter;
 
-		if ((letter = fread_letter(fp)) == 'S')
+		if ((letter = fread_letter(fp)) == 'S') {
 			break;
+		}
 
 		if (letter == '*') {
 			fread_to_eol(fp);
+			
 			continue;
 		}
 
@@ -4335,33 +4407,34 @@ void load_progs(FILE *fp)
 
 		pMudProg = NULL;
 		pMprogGroup = NULL;
-		pMprogList = NULL;
-		pMprogGroupList = NULL;
 
 		fBootDb = FALSE;
 		pMudProg = get_mprog_by_vnum(progvnum);
 		fBootDb = TRUE;
 
-		if (!pMudProg)
+		if (!pMudProg) {
 			pMprogGroup = get_mprog_group_by_vnum(progvnum);
+		}
 
 		switch (letter) {
 		default:
 			bug("Load_Progs: bad prog type '%c'.", letter);
+
 			#if defined(cbuilder)
 			return -1;
 			#else
 			exit(1);
 			#endif
+			
 			break;
 
 		case 'M':
-			iFound = 0;
 			pMobIndex = get_mob_index(targetvnum);
 
 			if (pMudProg) {
 				if (pMudProg->prog_type != MOB_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
@@ -4373,6 +4446,7 @@ void load_progs(FILE *fp)
 			} else {
 				if (pMprogGroup->prog_type != MOB_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
@@ -4384,13 +4458,14 @@ void load_progs(FILE *fp)
 			}
 
 			break;
+
 		case 'O':
-			iFound = 0;
 			pObjIndex = get_obj_index(targetvnum);
 
 			if (pMudProg) {
 				if (pMudProg->prog_type != OBJ_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
@@ -4402,6 +4477,7 @@ void load_progs(FILE *fp)
 			} else {
 				if (pMprogGroup->prog_type != OBJ_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
@@ -4414,12 +4490,12 @@ void load_progs(FILE *fp)
 
 			break;
 		case 'R':
-			iFound = 0;
 			pRoomIndex = get_room_index(targetvnum);
 
 			if (pMudProg) {
 				if (pMudProg->prog_type != ROOM_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
@@ -4431,6 +4507,7 @@ void load_progs(FILE *fp)
 			} else {
 				if (pMprogGroup->prog_type != ROOM_PROG) {
 					bug("Load_Progs: invalid prog type.");
+
 					#if defined(cbuilder)
 					return -1;
 					#else
