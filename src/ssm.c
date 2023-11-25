@@ -491,12 +491,15 @@ char *fread_string_eol(FILE *fp)
 	if (fBootDb) {
 		len = ptr - buf;
 
-		ptr = temp_hash_find(buf);
-		if (ptr)
-			return str_dup(ptr);
+		ptr = (signed char *)temp_hash_find((char *)buf);
 
-		ptr = str_dup(buf);
-		temp_hash_add(ptr, len);
+		if (ptr) {
+			return str_dup((char *)ptr);
+		}
+
+		ptr = (signed char *)str_dup((char *)buf);
+		temp_hash_add((char *)ptr, len);
+		
 		return (char *)ptr;
 	}
 
