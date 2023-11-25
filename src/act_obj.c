@@ -1320,18 +1320,16 @@ void wear_obj(CHAR_DATA *ch, OBJ_DATA *obj, bool fReplace)
 
 	if (CAN_WEAR(obj, ITEM_WIELD)) {
 		OBJ_DATA *weapon;
-		OBJ_DATA *second_weapon;
 		int sn = 0, skill;
 		weapon = get_eq_char(ch, WEAR_WIELD);
-		second_weapon = get_eq_char(ch, WEAR_SECOND_WIELD);
 
-		if (!remove_obj(ch, WEAR_SECOND_WIELD, fReplace))
+		if (!remove_obj(ch, WEAR_SECOND_WIELD, fReplace)) {
 			return;
+		}
 
-		if (!IS_NPC(ch)
-				&& get_obj_weight(obj) >
-				str_app[get_curr_stat(ch, STAT_STR)].wield) {
+		if (!IS_NPC(ch) && get_obj_weight(obj) > str_app[get_curr_stat(ch, STAT_STR)].wield) {
 			send_to_char("It is too heavy for you to wield.\n\r", ch);
+
 			return;
 		}
 
@@ -1347,14 +1345,19 @@ void wear_obj(CHAR_DATA *ch, OBJ_DATA *obj, bool fReplace)
 				|| (get_eq_char(ch, WEAR_SHIELD) != NULL
 						&& get_eq_char(ch, WEAR_HOLD) != NULL)) {
 			send_to_char("You'd need another free hand to do that.\n\r", ch);
-			if (get_eq_char(ch, WEAR_WIELD) != NULL)
-				if (!remove_obj(ch, WEAR_SECOND_WIELD, fReplace))
+
+			if (get_eq_char(ch, WEAR_WIELD) != NULL) {
+				if (!remove_obj(ch, WEAR_SECOND_WIELD, fReplace)) {
 					return;
+				}
+			}
+
 			return;
 		}
-		if ((weapon != NULL) && (ch->size < SIZE_LARGE)
-				&& IS_WEAPON_STAT(weapon, WEAPON_TWO_HANDS)) {
+
+		if ((weapon != NULL) && (ch->size < SIZE_LARGE) && IS_WEAPON_STAT(weapon, WEAPON_TWO_HANDS)) {
 			send_to_char("You'd need another free hand to do that.\n\r", ch);
+
 			return;
 		}
 
@@ -1371,57 +1374,62 @@ void wear_obj(CHAR_DATA *ch, OBJ_DATA *obj, bool fReplace)
 			sn = get_second_weapon_sn(ch);
 		}
 
-		if (get_eq_char(ch, WEAR_WIELD) != NULL)
+		if (get_eq_char(ch, WEAR_WIELD) != NULL) {
 			oprog_wear_trigger(ch, obj);
+		}
 
 		if (sn == gsn_hand_to_hand) {
-			act("You don't even know which end is up on $p.", ch, obj, NULL,
-					TO_CHAR);
+			act("You don't even know which end is up on $p.", ch, obj, NULL, TO_CHAR);
+
 			return;
 		}
 
 		skill = get_weapon_skill(ch, sn);
 
-		if (skill >= 100)
+		if (skill >= 100) {
 			act("$p feels like a part of you!", ch, obj, NULL, TO_CHAR);
-		else if (skill > 85)
+		} else if (skill > 85) {
 			act("You feel quite confident with $p.", ch, obj, NULL, TO_CHAR);
-		else if (skill > 70)
+		} else if (skill > 70) {
 			act("You are skilled with $p.", ch, obj, NULL, TO_CHAR);
-		else if (skill > 50)
+		} else if (skill > 50) {
 			act("Your skill with $p is adequate.", ch, obj, NULL, TO_CHAR);
-		else if (skill > 25)
-			act("$p feels a little clumsy in your hands.", ch, obj, NULL,
-					TO_CHAR);
-		else if (skill > 1)
+		} else if (skill > 25) {
+			act("$p feels a little clumsy in your hands.", ch, obj, NULL, TO_CHAR);
+		} else if (skill > 1) {
 			act("You fumble and almost drop $p.", ch, obj, NULL, TO_CHAR);
-		else
-			act("You don't even know which end is up on $p.",
-					ch, obj, NULL, TO_CHAR);
+		} else {
+			act("You don't even know which end is up on $p.", ch, obj, NULL, TO_CHAR);
+		}
 
 		return;
 	}
 
 	if (CAN_WEAR(obj, ITEM_HOLD)) {
-		if (!remove_obj(ch, WEAR_HOLD, fReplace))
-			return;
-		if (get_eq_char(ch, WEAR_WIELD) != NULL
-				&& (get_eq_char(ch, WEAR_SECOND_WIELD) != NULL
-						|| get_eq_char(ch, WEAR_SHIELD) != NULL)) {
-			send_to_char("You need one hand free to hold that.\n\r", ch);
+		if (!remove_obj(ch, WEAR_HOLD, fReplace)) {
 			return;
 		}
+
+		if (get_eq_char(ch, WEAR_WIELD) != NULL && (get_eq_char(ch, WEAR_SECOND_WIELD) != NULL || get_eq_char(ch, WEAR_SHIELD) != NULL)) {
+			send_to_char("You need one hand free to hold that.\n\r", ch);
+			
+			return;
+		}
+
 		if (!oprog_use_trigger(ch, obj, NULL, NULL)) {
 			act("$n holds $p in $s hands.", ch, obj, NULL, TO_ROOM);
 			act("You hold $p in your hands.", ch, obj, NULL, TO_CHAR);
 		}
+
 		equip_char(ch, obj, WEAR_HOLD);
 		oprog_wear_trigger(ch, obj);
+
 		return;
 	}
 
-	if (fReplace)
+	if (fReplace) {
 		send_to_char("You can't wear, wield, or hold that.\n\r", ch);
+	}
 
 	return;
 }
