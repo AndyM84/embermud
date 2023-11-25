@@ -25,6 +25,7 @@
 
 #define L_HER LEVEL_HERO
 #define L_IMM LEVEL_IMMORTAL
+
 DECLARE_DO_FUN(do_help);
 
 /*
@@ -239,18 +240,20 @@ static void save_board(BOARD_DATA *board)
 {
 	FILE *fp;
 	char filename[200];
-	char buf[200];
+	char buf[400];
 	NOTE_DATA *note;
 
 	sprintf(filename, "%s/%s", sysconfig.note_dir, board->short_name);
 
 	fp = fopen(filename, "w");
+	
 	if (!fp) {
 		sprintf(buf, "Error writing to: %s", filename);
 		bug(buf, 0);
 	} else {
-		for (note = board->note_first; note; note = note->next)
+		for (note = board->note_first; note; note = note->next) {
 			append_note(fp, note);
+		}
 
 		fclose(fp);
 	}
