@@ -510,37 +510,48 @@ void do_gocial(CHAR_DATA *ch, char *argument)
 			} else if (buf[counter] == '$' && buf[counter + 1] == 'M') {
 				buf[counter] = '%';
 				buf[counter + 1] = 's';
+
 				switch (victim->sex) {
 				default:
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "it");
+
 					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
+
 				case 1:
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "him");
+
 					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
+
 				case 2:
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "her");
-					for (count = 0; buf[count] != '\0'; count++);
-					{
+
+					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
 				}
 			} else if (buf[counter] == '$' && buf[counter + 1] == 'S') {
@@ -549,48 +560,57 @@ void do_gocial(CHAR_DATA *ch, char *argument)
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "its");
+
 					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
+
 				case 1:
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "his");
+
 					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
+
 				case 2:
 					strcpy(buf2, buf);
 					buf2[counter] = '\0';
 					strcat(buf2, "hers");
+
 					for (count = 0; buf[count] != '\0'; count++) {
 						buf[count] = buf[count + counter + 2];
 					}
+
 					strcat(buf2, buf);
 					strcpy(buf, buf2);
+
 					break;
 				}
 			}
-
 		}
+
 		for (d = descriptor_list; d != NULL; d = d->next) {
 			CHAR_DATA *vch;
 			vch = d->original ? d->original : d->character;
-			if (d->connected == CON_PLAYING &&
-					d->character != ch &&
-					d->character != victim &&
-					!IS_SET(vch->comm, COMM_NOGOC) &&
-					!IS_SET(vch->comm, COMM_QUIET)) {
+
+			if (d->connected == CON_PLAYING && d->character != ch && d->character != victim && !IS_SET(vch->comm, COMM_NOGOC) && !IS_SET(vch->comm, COMM_QUIET)) {
 				act_new(buf, ch, NULL, vch, TO_VICT, POS_DEAD);
 			}
 		}
 	}
+
 	return;
 }
 #endif
@@ -615,27 +635,29 @@ void do_music(CHAR_DATA *ch, char *argument)
 
 	/* Check for channel being OFF */
 	if (IS_SET(ch->comm, COMM_NOMUSIC)) {
-		send_to_char("`0Cannot send to the " CFG_MUS_NAME
-								 "`0 channel when you have it turned off!\n\r", ch);
+		send_to_char("`0Cannot send to the " CFG_MUS_NAME "`0 channel when you have it turned off!\n\r", ch);
+
 		return;
 	}
 
 	/* Check for quiet mode */
 	if (IS_SET(ch->comm, COMM_QUIET)) {
-		send_to_char("`0Cannot send to the " CFG_MUS_NAME
-								 "`0 channel without turning off quiet mode!\n\r", ch);
+		send_to_char("`0Cannot send to the " CFG_MUS_NAME "`0 channel without turning off quiet mode!\n\r", ch);
+
 		return;
 	}
 
 	/* Check for nochannel */
 	if (IS_SET(ch->comm, COMM_NOCHANNELS)) {
-		send_to_char
-		("The gods have revoked all of your channel priviliges!\n\r", ch);
+		send_to_char("The gods have revoked all of your channel priviliges!\n\r", ch);
+
 		return;
 	}
+
 	/* Make the words drunk if needed */
-	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10)
+	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10) {
 		argument = makedrunk(argument, ch);
+	}
 
 /* Send to everyone that should hear it */
 /* Loop through entire descriptor_list to catch anyone that's switched */
@@ -643,11 +665,7 @@ void do_music(CHAR_DATA *ch, char *argument)
 		CHAR_DATA *victim = d->character;
 
 		if (victim) {
-			if (victim != ch &&
-					d->connected == CON_PLAYING &&
-					!IS_SET(victim->comm, COMM_NOMUSIC) &&
-					!IS_SET(victim->comm, COMM_DEAF) &&
-					!IS_SET(victim->comm, COMM_QUIET)) {
+			if (victim != ch && d->connected == CON_PLAYING && !IS_SET(victim->comm, COMM_NOMUSIC) && !IS_SET(victim->comm, COMM_DEAF) && !IS_SET(victim->comm, COMM_QUIET)) {
 				act_new(CFG_MUS, ch, argument, victim, TO_VICT, MIN_POS_MUS);
 			}
 		}
@@ -681,31 +699,30 @@ void do_question(CHAR_DATA *ch, char *argument)
 
 	/* Check for channel being OFF */
 	if (IS_SET(ch->comm, COMM_NOQUESTION)) {
-		send_to_char
-		("`0Cannot send to the Q/A channel when you have it turned off!\n\r",
-		 ch);
+		send_to_char("`0Cannot send to the Q/A channel when you have it turned off!\n\r", ch);
+
 		return;
 	}
 
 	/* Check for quiet mode */
 	if (IS_SET(ch->comm, COMM_QUIET)) {
-		send_to_char
-		("`0Cannot send to the Q/A channel without turning off quiet mode!\n\r",
-		 ch);
+		send_to_char("`0Cannot send to the Q/A channel without turning off quiet mode!\n\r", ch);
+
 		return;
 	}
 
 	/* Check for nochannel */
 	if (IS_SET(ch->comm, COMM_NOCHANNELS)) {
-		send_to_char("The gods have revoked all of your channel priviliges!",
-								 ch);
+		send_to_char("The gods have revoked all of your channel priviliges!", ch);
+
 		return;
 	}
 
 	#ifdef QA_DRUNK
 			/* Make the words drunk if needed */
-	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10)
+	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10) {
 		argument = makedrunk(argument, ch);
+	}
 	#endif
 
 			/* Send to everyone that should hear it */
@@ -714,13 +731,8 @@ void do_question(CHAR_DATA *ch, char *argument)
 		CHAR_DATA *victim = d->character;
 
 		if (victim) {
-			if (victim != ch &&
-					d->connected == CON_PLAYING &&
-					!IS_SET(victim->comm, COMM_NOQUESTION) &&
-					!IS_SET(victim->comm, COMM_DEAF) &&
-					!IS_SET(victim->comm, COMM_QUIET)) {
-				act_new(CFG_QUESTION, ch, argument, victim, TO_VICT,
-								MIN_POS_QA);
+			if (victim != ch && d->connected == CON_PLAYING && !IS_SET(victim->comm, COMM_NOQUESTION) && !IS_SET(victim->comm, COMM_DEAF) && !IS_SET(victim->comm, COMM_QUIET)) {
+				act_new(CFG_QUESTION, ch, argument, victim, TO_VICT, MIN_POS_QA);
 			}
 		}
 	}
@@ -728,6 +740,8 @@ void do_question(CHAR_DATA *ch, char *argument)
 	/* Send to the speaker and add to the last queue */
 	act_new(CFG_QUESTION, ch, argument, ch, TO_CHAR, MIN_POS_QA);
 	add2last(CFG_QUESTION, argument, ch);
+
+	return;
 }
 
 /* RT answer channel - uses same line as questions */
@@ -2246,11 +2260,13 @@ void do_quit(CHAR_DATA *ch, char *argument)
 
 	send_to_char("\n\r", ch);
 
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (ch->position == POS_FIGHTING) {
 		send_to_char("No way! You are fighting.\n\r", ch);
+
 		return;
 	}
 
@@ -2259,23 +2275,28 @@ inform him that its not that easy ;) -Lancelight */
 
 	if (auction_info.high_bidder == ch || auction_info.owner == ch) {
 		send_to_char("You still have a stake in the auction!\n\r", ch);
+
 		return;
 	}
 
 	if (ch->position < POS_STUNNED) {
 		send_to_char("You're not DEAD yet.\n\r", ch);
+
 		return;
 	}
-	if (IS_SET(ch->act, PLR_BUILDING));
-	{
+
+	if (IS_SET(ch->act, PLR_BUILDING)) {
 		REMOVE_BIT(ch->act, PLR_BUILDING);
 	}
+
 	send_to_char(CFG_QUIT, ch);
 	ch->pcdata->ticks = 0;
+
 	if (!IS_SET(ch->act, PLR_WIZINVIS)) {
 		sprintf(buf, "%s has left the game.", ch->name);
 		do_sendinfo(ch, buf);
 	}
+
 	act("$n has left the game.", ch, NULL, NULL, TO_ROOM);
 	sprintf(log_buf, "%s has quit.", ch->name);
 	log_string(log_buf);
