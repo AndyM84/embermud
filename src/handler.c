@@ -31,8 +31,8 @@ DECLARE_DO_FUN(do_return);
 AFFECT_DATA *affect_free;
 NEWAFFECT_DATA *newaffect_free;
 
-char thedate[10];
-char thetime[7];
+char thedate[10 * 2];
+char thetime[7 * 2];
 
 /*
  * Local functions.

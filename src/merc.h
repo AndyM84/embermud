@@ -1132,8 +1132,8 @@ extern struct social_type social_table[MAX_SOCIALS];
  * Global variables.
  */
 /* from handler.c */
-extern char thetime[7];
-extern char thedate[10];
+extern char thetime[7 * 2];
+extern char thedate[10 * 2];
 
 extern HELP_DATA *help_first;
 extern TODO_DATA *todo_first;
