@@ -4,21 +4,49 @@ NOCRYPT =
 C_FLAGS = -Wall -ggdb -O3 $(PROF) $(NOCRYPT)
 L_FLAGS = -O2 $(PROF)
 
-O_FILES = act_comm.o	act_info.o	act_move.o \
-          act_obj.o	act_wiz.o	auction.o \
-          ban.o		bank.o		bit.o \
-          board.o	comm.o		const.o \
-          clan.o	class.o		db.o \
-          drunk2.o 	factions.o	fight.o \
-	  handler.o 	helpolc.o	interp.o \
-	  magic.o 	marry.o		mem.o \
-          mprog_commands.o 		mprog_procs.o \
-          mud_progs.o	olc.o           olc_act.o \
-	  olc_save.o	newbits.o 	pty.o	\
-      	  random.o	recycle.o       route_io.o \
-    	  save.o	skills.o 	socialolc.o \
-   	  ssm.o		string.o        todoolc.o \
-  	  update.o	remort.o 
+O_FILES = act_comm.o \
+          act_info.o \
+					act_move.o \
+          act_obj.o \
+					act_wiz.o \
+					auction.o \
+          ban.o \
+					bank.o \
+					bit.o \
+          board.o \
+					comm.o \
+					const.o \
+          clan.o \
+					class.o \
+					db.o \
+          drunk2.o \
+					factions.o \
+					fight.o \
+          handler.o \
+					helpolc.o \
+					interp.o \
+          magic.o \
+					marry.o \
+					mem.o \
+          mprog_commands.o \
+					mprog_procs.o \
+          mud_progs.o \
+					olc.o \
+					olc_act.o \
+          olc_save.o \
+					newbits.o \
+					pty.o	\
+      	  random.o \
+					recycle.o \
+					route_io.o \
+          save.o \
+					skills.o \
+					socialolc.o \
+          ssm.o \
+					string.o \
+					todoolc.o \
+          update.o \
+					remort.o
 
 all: ember
 
