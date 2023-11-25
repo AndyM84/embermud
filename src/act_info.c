@@ -1581,15 +1581,18 @@ void do_worth(CHAR_DATA *ch, char *argument)
 
 char *statdiff(int normal, int modified)
 {
-	static char tempstr[10];
+	static char tempstr[15];
 
 	strcpy(tempstr, "\0");
-	if (normal < modified)
+
+	if (normal < modified) {
 		sprintf(tempstr, "+%d", modified - normal);
-	else if (normal > modified)
+	} else if (normal > modified) {
 		sprintf(tempstr, "-%d", normal - modified);
-	else if (normal == modified)
+	} else if (normal == modified) {
 		sprintf(tempstr, "  ");
+	}
+
 	return (tempstr);
 }
 
@@ -3465,7 +3468,7 @@ void do_cwho(CHAR_DATA *ch)
 	-Kyle */
 void do_finger(CHAR_DATA *ch, char *argument)
 {
-	char buf[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH * 2];
 	char arg[MAX_INPUT_LENGTH];
 
 	static char *const he_she[] = { "It", "He", "She" };
@@ -3474,11 +3477,10 @@ void do_finger(CHAR_DATA *ch, char *argument)
 	char pfile[MAX_STRING_LENGTH], *title;
 	char *word, *class, *race, *comment, *email, *spouse, *nemesis;
 	long played = 0, logon = 0;
-	char buf2[MAX_STRING_LENGTH], ltime[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH + (MAX_STRING_LENGTH / 2)], ltime[MAX_STRING_LENGTH];
 	unsigned int x;
 	sh_int sex = 0, level, pk_kills, pk_deaths;
 	sh_int nclan = 0;
-	sh_int incarnations = 0;
 	CLAN_DATA *clan;
 
 	argument = one_argument(argument, arg);
@@ -3492,7 +3494,6 @@ void do_finger(CHAR_DATA *ch, char *argument)
 	level = 0;
 	pk_kills = 0;
 	pk_deaths = 0;
-	incarnations = 0;
 	comment = NULL;
 	email = NULL;
 	spouse = NULL;
@@ -3501,6 +3502,7 @@ void do_finger(CHAR_DATA *ch, char *argument)
 
 	if (arg[0] == '\0' || arg[0] == '.' || arg[0] == '/') {
 		send_to_char("You want information about whom?\n\r", ch);
+		
 		return;
 	}
 
@@ -3508,32 +3510,33 @@ void do_finger(CHAR_DATA *ch, char *argument)
 
 	if (victim != NULL) {
 		if (victim->anonymous) {
-			printf_to_char(ch, "%s is `KA`wN`WO`wN`KY`wM`WO`wU`KS`K",
-										 victim->name);
+			printf_to_char(ch, "%s is `KA`wN`WO`wN`KY`wM`WO`wU`KS`K", victim->name);
 			return;
 		}
 
-		sprintf(buf,
-						"\n\r      `y/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/~~\\\n\r");
+		sprintf(buf, "\n\r      `y/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/~~\\\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     |   `W%s%s", victim->name, victim->pcdata->title);
 		send_to_char(buf, ch);
 		strcpy(buf, "\0");
-		for (x = 0;
-				 x <
-				 62 - strlen(victim->name) - str_len(victim->pcdata->title);
-				 x++)
+		
+		for (x = 0; x < 62 - strlen(victim->name) - str_len(victim->pcdata->title); x++) {
 			strcat(buf, " ");
+		}
+
 		send_to_char(buf, ch);
 		sprintf(buf, "`y|____|\n\r");
 		send_to_char(buf, ch);
-		sprintf(buf,
-						"     |+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+|\n\r");
+		sprintf(buf, "     |+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+|\n\r");
 		send_to_char(buf, ch);
+		
 		if (victim->pcdata->clan > 0) {
 			clan = get_clan(victim->pcdata->clan);
-			if (clan == NULL)
+			
+			if (clan == NULL) {
 				return;
+			}
+
 			if ((!IS_NPC(ch)
 					 &&
 					 ((!IS_SET(clan->clan_flags, CLAN_PRIVATE)
@@ -3541,42 +3544,51 @@ void do_finger(CHAR_DATA *ch, char *argument)
 						|| (ch->pcdata->clan == victim->pcdata->clan
 								&& (IS_SET(clan->clan_flags, CLAN_PRIVATE)
 										|| (IS_SET(clan->clan_flags, CLAN_SECRET)
-												&& !str_cmp(victim->name,
-																		clan->leader))))))
-					|| IS_IMMORTAL(ch)) {
-				sprintf(buf2, "%s of %s",
-								!str_cmp(victim->name,
-												 clan->
-												 leader) ? "the leader" : !str_cmp(victim->
-																													 name,
-																													 clan->
-																													 god) ?
-								"the sponsor" : "a member", clan->whoname);
-			} else
+												&& !str_cmp(victim->name, clan->leader)))))) || IS_IMMORTAL(ch)) {
+				sprintf(
+					buf2,
+					"%s of %s",
+						!str_cmp(victim->name, clan->leader) ? "the leader" : !str_cmp(victim->name, clan->god) ? "the sponsor" : "a member",
+						clan->whoname
+				);
+			} else {
 				sprintf(buf2, "not a member of any clan.");
-		} else
+			}
+		} else {
 			sprintf(buf2, "not a member of any clan.");
+		}
 
-		sprintf(buf, "     | `GSex  : `Y%-7s   `W%s is %s`y",
-						victim->sex == 0 ? "Sexless" : victim->sex ==
-						1 ? "Male" : "Female", he_she[URANGE(0, victim->sex, 2)],
-						buf2);
+		sprintf(
+			buf,
+			"     | `GSex  : `Y%-7s   `W%s is %s`y",
+				victim->sex == 0 ? "Sexless" : victim->sex ==
+				1 ? "Male" : "Female", he_she[URANGE(0, victim->sex, 2)],
+				buf2
+		);
+		
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+		
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+		
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf,
 						"     | `GLevel: `Y%2d        `WLast login: %s`y",
 						UMIN(MAX_LEVEL, victim->level),
 						victim->desc ? "Currently playing" : "Currently link-dead");
+		
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+		
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+		
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GAge  :`Y%3d        `W%s is a %s %s.`y",
@@ -3586,8 +3598,11 @@ void do_finger(CHAR_DATA *ch, char *argument)
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GPK kills : `Y%-5d `WLast killed by: %s`y",
@@ -3595,8 +3610,11 @@ void do_finger(CHAR_DATA *ch, char *argument)
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GPK deaths: `Y%-5d `WEmail: %s`y",
@@ -3604,63 +3622,80 @@ void do_finger(CHAR_DATA *ch, char *argument)
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GIncarnations:`Y %d`y", victim->incarnations);
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GSpouse:`Y %s`y", victim->pcdata->spouse);
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
 		sprintf(buf, "     | `GComment: `Y%s`y", victim->pcdata->comment);
 		send_to_char(buf, ch);
 		x = str_len(buf);
 		strcpy(buf, "\0");
-		for (; x < 71; x++)
+
+		for (; x < 71; x++) {
 			strcat(buf, " ");
+		}
+
 		strcat(buf, "|\n\r");
 		send_to_char(buf, ch);
-		send_to_char
-		("`y  /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/   |\n\r",
-		 ch);
-		send_to_char
-		("`y  \\________________________________________________________________\\__/`w\n\r",
-		 ch);
+		send_to_char("`y  /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/   |\n\r", ch);
+		send_to_char("`y  \\________________________________________________________________\\__/`w\n\r", ch);
+		
 		return;
 	} else {
 		#if defined(unix)
 						/* decompress if .gz file exists */
-		sprintf(pfile, "%s/%s%s", sysconfig.player_dir, capitalize(arg),
-						".gz");
+		sprintf(pfile, "%s/%s%s", sysconfig.player_dir, capitalize(arg), ".gz");
+
 		if ((fp = fopen(pfile, "r")) != NULL) {
 			char buf[MAX_INPUT_LENGTH];
 			fclose(fp);
 			sprintf(buf, "gzip -dfq %s", pfile);
-			system(buf);
+			
+			if (system(buf) < 0) {
+				send_to_char("Error decompressing player file.\n\r", ch);
+				
+				return;
+			}
 		}
 		#endif
+
 		sprintf(pfile, "%s/%s", sysconfig.player_dir, capitalize(arg));
+
 		if ((fp = fopen(pfile, "r")) != NULL) {
 			for (;; ) {
 				word = get_word(fp);
+
 				if (!str_cmp(word, "Anon")) {
 					if (fread_number(fp) == 1) {
-						printf_to_char(ch,
-													 "%s is `KA`wN`WO`wN`KY`wM`WO`wU`KS`W",
-													 arg);
+						printf_to_char(ch, "%s is `KA`wN`WO`wN`KY`wM`WO`wU`KS`W", arg);
+
 						fclose(fp);
+
 						return;
 					}
 				}
@@ -3668,83 +3703,105 @@ void do_finger(CHAR_DATA *ch, char *argument)
 				if (!str_cmp(word, "End")) {
 					break;
 				}
+
 				if (!str_cmp(word, "#END")) {
 					break;
 				}
+
 				if (!str_cmp(word, "#PET")) {
 					break;
 				}
+
 				if (!str_cmp(word, "Spou")) {
 					spouse = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "Neme")) {
 					nemesis = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "PKdi")) {
 					pk_deaths = fread_number(fp);
 				}
+
 				if (!str_cmp(word, "PKki")) {
 					pk_kills = fread_number(fp);
 				}
+
 				if (!str_cmp(word, "Cmnt")) {
 					comment = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "Eml")) {
 					email = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "Logn")) {
 					logon = fread_number(fp);
-					sprintf(ltime, "%s at %s", get_date(logon),
-									get_time(logon));
+					sprintf(ltime, "%s at %s", get_date(logon), get_time(logon));
 				}
+
 				if (!str_cmp(word, "Plyd")) {
 					played = fread_number(fp);
 				}
+
 				if (!str_cmp(word, "Levl")) {
 					level = fread_number(fp);
 				}
+
 				if (!str_cmp(word, "Race")) {
 					race = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "Sex")) {
 					sex = fread_number(fp);
 				}
+
 				if (!str_cmp(word, "Cla")) {
 					class = (class_table[fread_number(fp)].name);
 				}
+
 				if (!str_cmp(word, "Titl")) {
 					title = fread_string(fp);
 				}
+
 				if (!str_cmp(word, "Clan")) {
 					nclan = fread_number(fp);
 				}
+
 				fread_to_eol(fp);
-				if (word)
+
+				if (word) {
 					free(word);
+				}
 			}
+
 			fclose(fp);
-			sprintf(buf,
-							"\n\r      `y/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/~~\\\n\r");
+			sprintf(buf, "\n\r      `y/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/~~\\\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     |   `W%s %s", capitalize(arg), title);
 			send_to_char(buf, ch);
 			strcpy(buf, "\0");
-			for (x = 0; x < 61 - strlen(arg) - str_len(title); x++)
+			
+			for (x = 0; x < 61 - strlen(arg) - str_len(title); x++) {
 				strcat(buf, " ");
+			}
+			
 			send_to_char(buf, ch);
 			sprintf(buf, "`y|____|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf,
 							"     |+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+|\n\r");
 			send_to_char(buf, ch);
+			
 			if (nclan > 0) {
 				clan = get_clan(nclan);
-				if (clan == NULL)
+			
+				if (clan == NULL) {
 					return;
-				if ((!IS_NPC(ch) && IS_SET(clan->clan_flags, CLAN_SECRET)
-						 && ch->pcdata->clan == nclan) ||
-						(!IS_SET(clan->clan_flags, CLAN_SECRET))
-						|| get_trust(ch) >= MAX_LEVEL) {
+				}
+
+				if ((!IS_NPC(ch) && IS_SET(clan->clan_flags, CLAN_SECRET) && ch->pcdata->clan == nclan) || (!IS_SET(clan->clan_flags, CLAN_SECRET)) || get_trust(ch) >= MAX_LEVEL) {
 					sprintf(buf2, "%s of %s",
 									!str_cmp(capitalize(arg),
 													 clan->
@@ -3752,19 +3809,26 @@ void do_finger(CHAR_DATA *ch, char *argument)
 									!str_cmp(capitalize(arg),
 													 clan->god) ? "the sponsor" : "a member",
 									clan->whoname);
-				} else
+				} else {
 					sprintf(buf2, "not a member of any clan.");
-			} else
+				}
+			} else {
 				sprintf(buf2, "not a member of any clan.");
-		/*          sprintf(buf2,"not a member of any clan." ); */
+			}
+		
+			/*          sprintf(buf2,"not a member of any clan." ); */
 			sprintf(buf, "     | `GSex  : `Y%-7s   `W%s is %s`y",
 							sex == 0 ? "Sexless" : sex == 1 ? "Male" : "Female",
 							he_she[URANGE(0, sex, 2)], buf2);
+			
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
-			for (; x < 71; x++)
+			
+			for (; x < 71; x++) {
 				strcat(buf, " ");
+			}
+			
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GLevel: `Y%3d       `WLast login: %s`y",
@@ -3773,8 +3837,11 @@ void do_finger(CHAR_DATA *ch, char *argument)
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
-			for (; x < 71; x++)
+			
+			for (; x < 71; x++) {
 				strcat(buf, " ");
+			}
+			
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GAge  :`Y%3ld        `W%s is a %s %s.`y",
@@ -3783,8 +3850,11 @@ void do_finger(CHAR_DATA *ch, char *argument)
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
-			for (; x < 71; x++)
+			
+			for (; x < 71; x++) {
 				strcat(buf, " ");
+			}
+			
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GPK kills : `Y%-5d `WLast killed by: %s`y",
@@ -3792,8 +3862,11 @@ void do_finger(CHAR_DATA *ch, char *argument)
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
-			for (; x < 71; x++)
+			
+			for (; x < 71; x++) {
 				strcat(buf, " ");
+			}
+			
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GPK deaths: `Y%-5d `WEmail: %s`y",
@@ -3801,40 +3874,45 @@ void do_finger(CHAR_DATA *ch, char *argument)
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
+
 			for (; x < 71; x++)
 				strcat(buf, " ");
+
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GSpouse:`Y %s`y", spouse);
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
+
 			for (; x < 71; x++)
 				strcat(buf, " ");
+
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
 			sprintf(buf, "     | `GComment: `Y%s`y", comment);
 			send_to_char(buf, ch);
 			x = str_len(buf);
 			strcpy(buf, "\0");
+
 			for (; x < 71; x++)
 				strcat(buf, " ");
+
 			strcat(buf, "|\n\r");
 			send_to_char(buf, ch);
-			send_to_char
-			("`y  /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/   |\n\r",
-			 ch);
-			send_to_char
-			("`y  \\________________________________________________________________\\__/`w\n\r",
-			 ch);
+			send_to_char("`y  /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/   |\n\r", ch);
+			send_to_char("`y  \\________________________________________________________________\\__/`w\n\r", ch);
 /*           if (class) free_string(&class);
  *           if (race) free_string(&race);
  *           if (comment) free_string(&comment);
  *           if (email) free_string(&email);
  *           if (nemesis) free_string(&nemesis); */
+
 			return;
 		}
+
 		send_to_char("That character does not exist on this mud.\n\r", ch);
+
 		return;
 	}
 }
@@ -3843,8 +3921,7 @@ void do_levelgain(CHAR_DATA *ch, char *argument)
 {
 	char buf[MAX_STRING_LENGTH];
 
-	if (ch->level < LEVEL_HERO && ch->exp >=
-			exp_per_level(ch, ch->pcdata->points)) {
+	if (ch->level < LEVEL_HERO && ch->exp >= exp_per_level(ch, ch->pcdata->points)) {
 		sprintf(buf, "%s has made it to level %d!", ch->name, ch->level + 1);
 		log_string(buf);
 		do_sendinfo(ch, buf);
@@ -3852,46 +3929,54 @@ void do_levelgain(CHAR_DATA *ch, char *argument)
 		advance_level(ch);
 		ch->level += 1;
 		save_char_obj(ch);
-	} else
+	} else {
 		send_to_char("\n\rYou're not quite ready yet.\n\r", ch);
+	}
 }
+
 void do_rebirt(CHAR_DATA *ch, char *argument)
 {
 	send_to_char("If you want to REBIRTH, spell it out!\n\r", ch);
+
 	return;
 }
 
 void do_rebirth(CHAR_DATA *ch, char *argument)
 {
-	OBJ_DATA *obj, *obj_next;
+	OBJ_DATA *obj;
 	char buf[MAX_STRING_LENGTH];
 	int iWear;
 
 	if (str_cmp(ch->desc->incomm, "rebirth yes")) {
 		send_to_char("If you want to be reborn, type 'rebirth yes'\n\r", ch);
 		send_to_char("CAUTION: You will lose eq, trains, and more.\n\r", ch);
+
 		return;
 	}
+
 	if (ch->level < LEVEL_HERO) {
 		sprintf(buf, "You must be level %d to be reborn.\n\r", LEVEL_HERO);
 		send_to_char(buf, ch);
+
 		return;
 	}
 
 	if (ch->level > 52) {
 		send_to_char("Why the hell would you want to do that?\n\r", ch);
+
 		return;
 	}
 
 	if (ch->incarnations >= 4) {
 		send_to_char("You have been reborn max times.\n\r", ch);
+
 		return;
 	}
 
 	for (iWear = 0; iWear < MAX_WEAR; iWear++) {
-
-		if (!(obj = get_eq_char(ch, iWear)))
+		if (!(obj = get_eq_char(ch, iWear))) {
 			continue;
+		}
 
 		unequip_char(ch, obj);
 
@@ -3899,12 +3984,15 @@ void do_rebirth(CHAR_DATA *ch, char *argument)
 	}
 
 	for (obj = ch->carrying; obj; obj = obj->next_content) {
-		obj_next = obj->next_content;
 		extract_obj(obj);
 	}
-	if (!IS_SET(ch->act, PLR_REMORT))
+
+	if (!IS_SET(ch->act, PLR_REMORT)) {
 		SET_BIT(ch->act, PLR_REMORT);
-	ch->incarnations = ++ch->incarnations;
+	}
+
+	++ch->incarnations;
+
 	/* reset misc */
 	ch->pcdata->condition[COND_THIRST] = 0;
 	ch->pcdata->condition[COND_FULL] = 0;
@@ -3934,6 +4022,8 @@ void do_rebirth(CHAR_DATA *ch, char *argument)
 
 	/* completed message */
 	send_to_char("You have been reborn annew.\n\r", ch);
+
+	return;
 }
 
 /* This was alias.c and that's why this huge header is here.  */
