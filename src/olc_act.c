@@ -840,7 +840,7 @@ AEDIT(aedit_builder)
 		return TRUE;
 	} else {
 		buf[0] = '\0';
-		if (strstr(pArea->builders, "None") != '\0') {
+		if (*(strstr(pArea->builders, "None")) != '\0') {
 			pArea->builders = string_replace(pArea->builders, "None", "\0");
 			pArea->builders = string_unpad(pArea->builders);
 		}
@@ -1220,17 +1220,19 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 	}
 
 	if (!str_cmp(command, "dig")) {
-		char buf1[MAX_INPUT_LENGTH];
+		char buf1[MAX_INPUT_LENGTH * 2];
 
 		if (!arg[0] || !is_number(arg)) {
 			send_to_char("Syntax: [direction] dig <vnum> [flag]\n\r", ch);
+			
 			return FALSE;
 		}
 
 		one_argument(arg, temp);
 
-		if (!is_number(temp))
+		if (!is_number(temp)) {
 			send_to_char("vnum is not an integer\n\r", ch);
+		}
 
 		redit_create(ch, temp);
 		sprintf(buf1, "link %s", temp);
@@ -1242,6 +1244,7 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 	if (!str_cmp(command, "room")) {
 		if (!arg[0] || !is_number(arg)) {
 			send_to_char("Syntax:  [direction] room [vnum]\n\r", ch);
+			
 			return FALSE;
 		}
 
@@ -1253,6 +1256,7 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 
 		if (!get_room_index(value)) {
 			send_to_char("REdit:  Cannot link to non-existant room.\n\r", ch);
+			
 			return FALSE;
 		}
 
@@ -1261,19 +1265,20 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 /*	    pRoom->exit[door]->vnum = value;                 Can't set vnum in ROM */
 
 		send_to_char("One-way link established.\n\r", ch);
+		
 		return TRUE;
 	}
 
 	if (!str_cmp(command, "key")) {
 		if (!arg[0] || !is_number(arg)) {
 			send_to_char("Syntax:  [direction] key [vnum]\n\r", ch);
+		
 			return FALSE;
 		}
 
 		if (!pRoom->exit[door]) {
-			send_to_char
-			("REdit:  Cannot make a key for a non-existant exit.\n\r",
-			 ch);
+			send_to_char("REdit:  Cannot make a key for a non-existant exit.\n\r", ch);
+			
 			return FALSE;
 		}
 
@@ -1281,28 +1286,33 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 
 		if (!get_obj_index(value)) {
 			send_to_char("REdit:  Item doesn't exist.\n\r", ch);
+
 			return FALSE;
 		}
 
 		if (get_obj_index(atoi(argument))->item_type != ITEM_KEY) {
 			send_to_char("REdit:  Key doesn't exist.\n\r", ch);
+
 			return FALSE;
 		}
 
 		pRoom->exit[door]->key = value;
 
 		send_to_char("Exit key set.\n\r", ch);
+
 		return TRUE;
 	}
 
 	if (!str_cmp(command, "name")) {
 		if (!arg[0]) {
 			send_to_char("Syntax:  [direction] name [string]\n\r", ch);
+
 			return FALSE;
 		}
 
 		if (!pRoom->exit[door]) {
 			send_to_char("REdit:  Cannot name a non-existant exit.\n\r", ch);
+
 			return FALSE;
 		}
 
@@ -1310,22 +1320,25 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 		pRoom->exit[door]->keyword = str_dup(arg);
 
 		send_to_char("Exit name set.\n\r", ch);
+
 		return TRUE;
 	}
 
 	if (!str_prefix(command, "description")) {
 		if (!arg[0]) {
 			if (!pRoom->exit[door]) {
-				send_to_char
-				("REdit:  Cannot describe a non-existant exit.\n\r", ch);
+				send_to_char("REdit:  Cannot describe a non-existant exit.\n\r", ch);
+
 				return FALSE;
 			}
+
 			string_append(ch, &pRoom->exit[door]->description);
 
 			return TRUE;
 		}
 
 		send_to_char("Syntax:  [direction] desc\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -1339,8 +1352,8 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 			sh_int rev;         /* ROM OLC */
 
 			if (!pRoom->exit[door]) {
-				send_to_char("REdit:  Cannot flag a non-existant exit.\n\r",
-										 ch);
+				send_to_char("REdit:  Cannot flag a non-existant exit.\n\r", ch);
+
 				return FALSE;
 			}
 
@@ -1367,62 +1380,68 @@ bool change_exit(CHAR_DATA *ch, char *argument, int door)
 			}
 
 			send_to_char("Exit flag toggled.\n\r", ch);
+
 			return TRUE;
 		}
 	}
 
 	/* If we make it to here, user has typed an invalid command. */
 
-	send_to_char
-	("That is not a valid exit command!  Type \"help exit\" for help.\n\r",
-	 ch);
+	send_to_char("That is not a valid exit command!  Type \"help exit\" for help.\n\r", ch);
+
 	return FALSE;
 }
 
 REDIT(redit_north)
 {
-	if (change_exit(ch, argument, DIR_NORTH))
+	if (change_exit(ch, argument, DIR_NORTH)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
 
 REDIT(redit_south)
 {
-	if (change_exit(ch, argument, DIR_SOUTH))
+	if (change_exit(ch, argument, DIR_SOUTH)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
 
 REDIT(redit_east)
 {
-	if (change_exit(ch, argument, DIR_EAST))
+	if (change_exit(ch, argument, DIR_EAST)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
 
 REDIT(redit_west)
 {
-	if (change_exit(ch, argument, DIR_WEST))
+	if (change_exit(ch, argument, DIR_WEST)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
 
 REDIT(redit_up)
 {
-	if (change_exit(ch, argument, DIR_UP))
+	if (change_exit(ch, argument, DIR_UP)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
 
 REDIT(redit_down)
 {
-	if (change_exit(ch, argument, DIR_DOWN))
+	if (change_exit(ch, argument, DIR_DOWN)) {
 		return TRUE;
+	}
 
 	return FALSE;
 }
@@ -1444,12 +1463,14 @@ REDIT(redit_ed)
 		send_to_char("         ed edit [keyword]\n\r", ch);
 		send_to_char("         ed delete [keyword]\n\r", ch);
 		send_to_char("         ed format [keyword]\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (!str_cmp(command, "add")) {
 		if (!keyword[0]) {
 			send_to_char("Syntax:  ed add [keyword]\n\r", ch);
+
 			return FALSE;
 		}
 
@@ -1467,17 +1488,19 @@ REDIT(redit_ed)
 	if (!str_cmp(command, "edit")) {
 		if (!keyword[0]) {
 			send_to_char("Syntax:  ed edit [keyword]\n\r", ch);
+
 			return FALSE;
 		}
 
 		for (ed = pRoom->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
+			}
 		}
 
 		if (!ed) {
-			send_to_char("REdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("REdit:  Extra description keyword not found.\n\r", ch);
+
 			return FALSE;
 		}
 
@@ -1491,56 +1514,65 @@ REDIT(redit_ed)
 
 		if (!keyword[0]) {
 			send_to_char("Syntax:  ed delete [keyword]\n\r", ch);
+
 			return FALSE;
 		}
 
 		for (ed = pRoom->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
+			}
+
 			ped = ed;
 		}
 
 		if (!ed) {
-			send_to_char("REdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("REdit:  Extra description keyword not found.\n\r", ch);
+
 			return FALSE;
 		}
 
-		if (!ped)
+		if (!ped) {
 			pRoom->extra_descr = ed->next;
-		else
+		} else {
 			ped->next = ed->next;
+		}
 
 		free_extra_descr(ed);
 
 		send_to_char("Extra description deleted.\n\r", ch);
+
 		return TRUE;
 	}
 
 	if (!str_cmp(command, "format")) {
 		if (!keyword[0]) {
 			send_to_char("Syntax:  ed format [keyword]\n\r", ch);
+
 			return FALSE;
 		}
 
 		for (ed = pRoom->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
+			}
 		}
 
 		if (!ed) {
-			send_to_char("REdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("REdit:  Extra description keyword not found.\n\r", ch);
+
 			return FALSE;
 		}
 
 		ed->description = format_string(ed->description);
 
 		send_to_char("Extra description formatted.\n\r", ch);
+
 		return TRUE;
 	}
 
 	redit_ed(ch, "");
+
 	return FALSE;
 }
 
@@ -1557,6 +1589,7 @@ REDIT(redit_create)
 
 	if (!argument[0] || value <= 0) {
 		send_to_char("Syntax:  create [vnum > 0]\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -1564,16 +1597,19 @@ REDIT(redit_create)
 
 	if (!pArea) {
 		send_to_char("REdit:  That vnum is not assigned an area.\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (!IS_BUILDER(ch, pArea)) {
 		send_to_char("REdit:  Vnum in an area you cannot build in.\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (get_room_index(value)) {
 		send_to_char("REdit:  Room vnum already exists.\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -1581,8 +1617,9 @@ REDIT(redit_create)
 	pRoom->area = pArea;
 	pRoom->vnum = value;
 
-	if (value > top_vnum_room)
+	if (value > top_vnum_room) {
 		top_vnum_room = value;
+	}
 
 	iHash = value % MAX_KEY_HASH;
 	pRoom->next = room_index_hash[iHash];
@@ -1590,6 +1627,7 @@ REDIT(redit_create)
 	ch->desc->pEdit = (void *)pRoom;
 
 	send_to_char("Room created.\n\r", ch);
+	
 	return TRUE;
 }
 
@@ -1601,6 +1639,7 @@ REDIT(redit_name)
 
 	if (!argument[0]) {
 		send_to_char("Syntax:  name [name]\n\r", ch);
+	
 		return FALSE;
 	}
 
@@ -1608,6 +1647,7 @@ REDIT(redit_name)
 	pRoom->name = str_dup(argument);
 
 	send_to_char("Name set.\n\r", ch);
+
 	return TRUE;
 }
 
@@ -1619,10 +1659,12 @@ REDIT(redit_desc)
 
 	if (!argument[0]) {
 		string_append(ch, &pRoom->description);
+
 		return TRUE;
 	}
 
 	send_to_char("Syntax:  desc\n\r", ch);
+
 	return FALSE;
 }
 
@@ -1635,6 +1677,7 @@ REDIT(redit_format)
 	pRoom->description = format_string(pRoom->description);
 
 	send_to_char("String formatted.\n\r", ch);
+
 	return TRUE;
 }
 
@@ -1653,16 +1696,19 @@ REDIT(redit_mreset)
 
 	if (!arg[0] || !is_number(arg)) {
 		send_to_char("Syntax:  mreset <vnum> <max #>\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (!(pMobIndex = get_mob_index(atoi(arg)))) {
 		send_to_char("REdit: No mobile has that vnum.\n\r", ch);
+
 		return FALSE;
 	}
 
 	if (pMobIndex->area != pRoom->area) {
 		send_to_char("REdit: No such mobile in this area.\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -1682,10 +1728,14 @@ REDIT(redit_mreset)
 	newmob = create_mobile(pMobIndex);
 	char_to_room(newmob, pRoom);
 
-	sprintf(output, "%s (%d) has been loaded and added to resets.\n\r"
-					"There will be a maximum of %d loaded to this room.\n\r",
-					capitalize(pMobIndex->short_descr),
-					pMobIndex->vnum, pReset->arg2);
+	sprintf(
+		output,
+		"%s (%d) has been loaded and added to resets.\n\r"
+			"There will be a maximum of %d loaded to this room.\n\r",
+			capitalize(pMobIndex->short_descr),
+			pMobIndex->vnum, pReset->arg2
+	);
+	
 	send_to_char(output, ch);
 	act("$n has created $N!", ch, NULL, newmob, TO_ROOM);
 
@@ -1732,8 +1782,9 @@ int wear_loc(int bits, int count)
 	int flag;
 
 	for (flag = 0; wear_table[flag].wear_bit != NO_FLAG; flag++) {
-		if (IS_SET(bits, wear_table[flag].wear_bit) && --count < 1)
+		if (IS_SET(bits, wear_table[flag].wear_bit) && --count < 1) {
 			return wear_table[flag].wear_loc;
+		}
 	}
 
 	return NO_FLAG;
@@ -1749,8 +1800,9 @@ int wear_bit(int loc)
 	int flag;
 
 	for (flag = 0; wear_table[flag].wear_loc != NO_FLAG; flag++) {
-		if (loc == wear_table[flag].wear_loc)
+		if (loc == wear_table[flag].wear_loc) {
 			return wear_table[flag].wear_bit;
+		}
 	}
 
 	return 0;
@@ -1779,16 +1831,19 @@ REDIT(redit_oreset)
 		send_to_char("        -no_args               = into room\n\r", ch);
 		send_to_char("        -<obj_name>            = into obj\n\r", ch);
 		send_to_char("        -<mob_name> <wear_loc> = into mob\n\r", ch);
+		
 		return FALSE;
 	}
 
 	if (!(pObjIndex = get_obj_index(atoi(arg)))) {
 		send_to_char("REdit: No object has that vnum.\n\r", ch);
+		
 		return FALSE;
 	}
 
 	if (pObjIndex->area != pRoom->area) {
 		send_to_char("REdit: No such object in this area.\n\r", ch);
+		
 		return FALSE;
 	}
 
@@ -1806,16 +1861,13 @@ REDIT(redit_oreset)
 		newobj = create_object(pObjIndex, number_fuzzy(olevel));
 		obj_to_room(newobj, pRoom);
 
-		sprintf(output, "%s (%d) has been loaded and added to resets.\n\r",
-						capitalize(pObjIndex->short_descr), pObjIndex->vnum);
+		sprintf(output, "%s (%d) has been loaded and added to resets.\n\r", capitalize(pObjIndex->short_descr), pObjIndex->vnum);
 		send_to_char(output, ch);
-	} else
+	} else {
 			/*
 			 * Load into object's inventory.
 			 */
-		if (argument[0] == '\0'
-				&& ((to_obj = get_obj_list(ch, arg2, pRoom->contents)) !=
-						NULL)) {
+		if (argument[0] == '\0' && ((to_obj = get_obj_list(ch, arg2, pRoom->contents)) != NULL)) {
 			pReset = new_reset_data();
 			pReset->command = 'P';
 			pReset->vnum = pObjIndex->vnum;
@@ -1827,13 +1879,17 @@ REDIT(redit_oreset)
 			newobj->cost = 0;
 			obj_to_obj(newobj, to_obj);
 
-			sprintf(output, "%s (%d) has been loaded into "
-							"%s (%d) and added to resets.\n\r",
-							capitalize(newobj->short_descr),
-							newobj->pIndexData->vnum,
-							to_obj->short_descr, to_obj->pIndexData->vnum);
+			sprintf(
+				output,
+				"%s (%d) has been loaded into "
+					"%s (%d) and added to resets.\n\r",
+					capitalize(newobj->short_descr),
+					newobj->pIndexData->vnum,
+					to_obj->short_descr, to_obj->pIndexData->vnum
+			);
+			
 			send_to_char(output, ch);
-		} else
+		} else {
 				/*
 				 * Load into mobile's inventory.
 				 */
@@ -1845,6 +1901,7 @@ REDIT(redit_oreset)
 				 */
 				if ((wear_loc = flag_value(wear_loc_flags, argument)) == NO_FLAG) {
 					send_to_char("REdit: Invalid wear_loc.  '? wear-loc'\n\r", ch);
+			
 					return FALSE;
 				}
 
@@ -1852,10 +1909,9 @@ REDIT(redit_oreset)
 				 * Disallow loading a sword(WEAR_WIELD) into WEAR_HEAD.
 				 */
 				if (!IS_SET(pObjIndex->wear_flags, wear_bit(wear_loc))) {
-					sprintf(output, "%s (%d) has wear flags: [%s]\n\r",
-									capitalize(pObjIndex->short_descr), pObjIndex->vnum,
-									flag_string(wear_flags, pObjIndex->wear_flags));
+					sprintf(output, "%s (%d) has wear flags: [%s]\n\r", capitalize(pObjIndex->short_descr), pObjIndex->vnum, flag_string(wear_flags, pObjIndex->wear_flags));
 					send_to_char(output, ch);
+					
 					return FALSE;
 				}
 
@@ -1864,16 +1920,20 @@ REDIT(redit_oreset)
 				 */
 				if (get_eq_char(to_mob, wear_loc)) {
 					send_to_char("REdit:  Object already equipped.\n\r", ch);
+					
 					return FALSE;
 				}
 
 				pReset = new_reset_data();
 				pReset->vnum = pObjIndex->vnum;
 				pReset->arg2 = wear_loc;
-				if (pReset->arg2 == WEAR_NONE)
+				
+				if (pReset->arg2 == WEAR_NONE) {
 					pReset->command = 'G';
-				else
+				} else {
 					pReset->command = 'E';
+				}
+
 				pReset->arg3 = wear_loc;
 
 				add_reset(pRoom, pReset, 0 /* Last slot */);
@@ -1881,8 +1941,7 @@ REDIT(redit_oreset)
 				olevel = URANGE(0, to_mob->level - 2, LEVEL_HERO);
 				newobj = create_object(pObjIndex, number_fuzzy(olevel));
 
-				if (to_mob->pIndexData->pShop)    /* Shop-keeper? */
-				{
+				if (to_mob->pIndexData->pShop) {   /* Shop-keeper? */
 					switch (pObjIndex->item_type) {
 					default:
 						olevel = 0;
@@ -1914,30 +1973,42 @@ REDIT(redit_oreset)
 					}
 
 					newobj = create_object(pObjIndex, olevel);
-					if (pReset->arg2 == WEAR_NONE)
+
+					if (pReset->arg2 == WEAR_NONE) {
 						SET_BIT(newobj->extra_flags, ITEM_INVENTORY);
-				} else
+					}
+				} else {
 					newobj = create_object(pObjIndex, number_fuzzy(olevel));
+				}
 
 				obj_to_char(newobj, to_mob);
-				if (pReset->command == 'E')
+				
+				if (pReset->command == 'E') {
 					equip_char(to_mob, newobj, pReset->arg3);
+				}
 
-				sprintf(output, "%s (%d) has been loaded "
-								"%s of %s (%d) and added to resets.\n\r",
-								capitalize(pObjIndex->short_descr),
-								pObjIndex->vnum,
-								flag_string(wear_loc_strings, pReset->arg3),
-								to_mob->short_descr, to_mob->pIndexData->vnum);
+				sprintf(
+					output,
+					"%s (%d) has been loaded "
+						"%s of %s (%d) and added to resets.\n\r",
+						capitalize(pObjIndex->short_descr),
+						pObjIndex->vnum,
+						flag_string(wear_loc_strings, pReset->arg3),
+						to_mob->short_descr, to_mob->pIndexData->vnum
+				);
+				
 				send_to_char(output, ch);
-			} else                        /* Display Syntax */
-			{
+			} else {                       /* Display Syntax */
 				send_to_char("REdit:  That mobile isn't here.\n\r", ch);
+				
 				return FALSE;
 			}
+		}
+	}
 
-			act("$n has created $p!", ch, newobj, NULL, TO_ROOM);
-			return TRUE;
+	act("$n has created $p!", ch, newobj, NULL, TO_ROOM);
+			
+	return TRUE;
 }
 
 /*
@@ -2785,12 +2856,14 @@ OEDIT(oedit_ed)
 		send_to_char("         ed delete [keyword]\n\r", ch);
 		send_to_char("         ed edit [keyword]\n\r", ch);
 		send_to_char("         ed format [keyword]\n\r", ch);
+		
 		return FALSE;
 	}
 
 	if (!str_cmp(command, "add")) {
 		if (keyword[0] == '\0') {
 			send_to_char("Syntax:  ed add [keyword]\n\r", ch);
+			
 			return FALSE;
 		}
 
@@ -2807,17 +2880,19 @@ OEDIT(oedit_ed)
 	if (!str_cmp(command, "edit")) {
 		if (keyword[0] == '\0') {
 			send_to_char("Syntax:  ed edit [keyword]\n\r", ch);
+			
 			return FALSE;
 		}
 
 		for (ed = pObj->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
+			}
 		}
 
 		if (!ed) {
-			send_to_char("OEdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("OEdit:  Extra description keyword not found.\n\r", ch);
+			
 			return FALSE;
 		}
 
@@ -2831,59 +2906,63 @@ OEDIT(oedit_ed)
 
 		if (keyword[0] == '\0') {
 			send_to_char("Syntax:  ed delete [keyword]\n\r", ch);
+			
 			return FALSE;
 		}
 
 		for (ed = pObj->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
+			}
+			
 			ped = ed;
 		}
 
 		if (!ed) {
-			send_to_char("OEdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("OEdit:  Extra description keyword not found.\n\r", ch);
 			return FALSE;
 		}
 
-		if (!ped)
+		if (!ped) {
 			pObj->extra_descr = ed->next;
-		else
+		} else {
 			ped->next = ed->next;
+		}
 
 		free_extra_descr(ed);
-
 		send_to_char("Extra description deleted.\n\r", ch);
+	
 		return TRUE;
 	}
 
 	if (!str_cmp(command, "format")) {
-		EXTRA_DESCR_DATA *ped = NULL;
-
 		if (keyword[0] == '\0') {
 			send_to_char("Syntax:  ed format [keyword]\n\r", ch);
+
 			return FALSE;
 		}
 
 		for (ed = pObj->extra_descr; ed; ed = ed->next) {
-			if (is_name(keyword, ed->keyword))
+			if (is_name(keyword, ed->keyword)) {
 				break;
-			ped = ed;
+			}
 		}
 
 		if (!ed) {
-			send_to_char("OEdit:  Extra description keyword not found.\n\r",
-									 ch);
+			send_to_char("OEdit:  Extra description keyword not found.\n\r", ch);
+			
 			return FALSE;
 		}
 
 		ed->description = format_string(ed->description);
 
 		send_to_char("Extra description formatted.\n\r", ch);
+		
 		return TRUE;
 	}
 
 	oedit_ed(ch, "");
+	
 	return FALSE;
 }
 
@@ -4922,7 +5001,7 @@ MPEDIT(mpedit_unassign)
 
 void show_mprog(CHAR_DATA *ch, MPROG_DATA *pMudProg)
 {
-	char buf[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH * 2];
 	char buf2[MAX_STRING_LENGTH];
 
 	if (!pMudProg)
@@ -4939,22 +5018,33 @@ void show_mprog(CHAR_DATA *ch, MPROG_DATA *pMudProg)
 		sprintf(buf2, "RoomProg");
 		break;
 	}
-	sprintf(buf, "[%4d] %-20s   -   ProgType: %s\n\rDesc: %s\n\r>%s %s~\n\r",
-					pMudProg->vnum, pMudProg->name, buf2,
-					pMudProg->description,
-					mprog_type_to_name(pMudProg->trigger_type),
-					pMudProg->arglist ? pMudProg->arglist : "NULL");
+	
+	sprintf(
+		buf,
+		"[%4d] %-20s   -   ProgType: %s\n\rDesc: %s\n\r>%s %s~\n\r",
+			pMudProg->vnum,
+			pMudProg->name,
+			buf2,
+			pMudProg->description,
+			mprog_type_to_name(pMudProg->trigger_type),
+			pMudProg->arglist ? pMudProg->arglist : "NULL"
+	);
 
-	sprintf(buf2, "%s~\n\r",
-					pMudProg->comlist ? pMudProg->comlist : "NULL\n\r");
+	sprintf(
+		buf2,
+		"%s~\n\r",
+			pMudProg->comlist ? pMudProg->comlist : "NULL\n\r"
+	);
 
 	if (strlen(buf) + strlen(buf2) >= sizeof(buf)) {
 		page_to_char(buf, ch);
 		page_to_char(buf2, ch);
+	
 		return;
 	} else {
 		strcat(buf, buf2);
 		page_to_char(buf, ch);
+		
 		return;
 	}
 }
