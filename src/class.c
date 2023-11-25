@@ -75,29 +75,47 @@ void load_class(int num)
 	sprintf(buf, "%s%s", sysconfig.class_dir, class_table[num].name);
 
 	if (!(fp = fopen(buf, "r"))) {
-		bug("Could not open file %s in order to load class %s.", buf,
-				class_table[num].name);
+		bug("Could not open file %s in order to load class %s.", buf, class_table[num].name);
+		
 		return;
 	}
 
-	fscanf(fp, "%d %d", &level, &cp);
+	if (fscanf(fp, "%d %d", &level, &cp) == 0) {
+		bug("Error reading class file %s.", buf);
+		
+		return;
+	}
 
 	while (level != -1) {
-		fscanf(fp, " %[^\n]\n", buf); /* read name of skill into buf */
+		if (fscanf(fp, " %[^\n]\n", buf) == 0) { /* read name of skill into buf */
+			bug("Error reading class file %s.", buf);
+
+			break;
+		}
 
 		n = skill_lookup(buf);    /* find index */
 
 		if (n == -1) {
-			char buf2[200];
-			sprintf(buf2, "Class %s: unknown spell %s", class_table[num].name,
-							buf);
+			char buf2[MAX_STRING_LENGTH * 2];
+			
+			sprintf(
+				buf2,
+				"Class %s: unknown spell %s",
+					class_table[num].name,
+					buf
+			);
+			
 			bug(buf2, 0);
 		} else {
 			skill_table[n].skill_level[num] = level;
 			skill_table[n].rating[num] = cp;
 		}
 
-		fscanf(fp, "%d %d", &level, &cp);
+		if (fscanf(fp, "%d %d", &level, &cp) == 0) {
+			bug("Error reading class file %s.", buf);
+			
+			break;
+		}
 	}
 
 	fclose(fp);
