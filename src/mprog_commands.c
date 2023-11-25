@@ -744,23 +744,30 @@ void do_mpinvis(CHAR_DATA *ch, char *argument)
 
 	if (!IS_NPC(ch)) {
 		send_to_char("Huh?\n\r", ch);
+
 		return;
 	}
 
 	argument = one_argument(argument, arg);
-	if (arg && arg[0] != '\0') {
+
+	if (arg[0] != '\0') {
 		if (!is_number(arg)) {
 			bug("Mpinvis - Non numeric argument ", ch);
+
 			return;
 		}
+
 		level = atoi(arg);
+
 		if (level < 2 || level > MAX_LEVEL) {
 			bug("MPinvis - Invalid level ", ch);
+
 			return;
 		}
 
 		ch->mobinvis = level;
 		printf_to_char(ch, "Mobinvis level set to %d.\n\r", level);
+
 		return;
 	}
 
@@ -1324,22 +1331,25 @@ void do_mprandomsocial(CHAR_DATA *ch, char *argument)
 		}
 
 /* use to be argument */
-	if (argument == '\0') {
+	if (*argument == '\0') {
 		if (str_cmp(RandomSOCIAL->others_no_arg, "none")) {
 			act(RandomSOCIAL->others_no_arg, ch, NULL, victim, TO_ROOM);
 		}
+		
 		if (str_cmp(RandomSOCIAL->char_no_arg, "none")) {
 			act(RandomSOCIAL->char_no_arg, ch, NULL, victim, TO_CHAR);
 		}
 	} else if ((victim = get_char_room(ch, argument)) == NULL) {
 		if (str_cmp(RandomSOCIAL->char_not_found, "none")) {
 			act(RandomSOCIAL->char_not_found, ch, NULL, victim, TO_CHAR);
-		} else
+		} else {
 			send_to_char("They aren't here.\n\r", ch);
+		}
 	} else if (victim == ch) {
 		if (str_cmp(RandomSOCIAL->others_auto, "none")) {
 			act(RandomSOCIAL->others_auto, ch, NULL, victim, TO_ROOM);
 		}
+
 		if (str_cmp(RandomSOCIAL->char_auto, "none")) {
 			act(RandomSOCIAL->char_auto, ch, NULL, victim, TO_CHAR);
 		}
@@ -1347,19 +1357,18 @@ void do_mprandomsocial(CHAR_DATA *ch, char *argument)
 		if (str_cmp(RandomSOCIAL->others_found, "none")) {
 			act(RandomSOCIAL->others_found, ch, NULL, victim, TO_NOTVICT);
 		}
+
 		if (str_cmp(RandomSOCIAL->char_found, "none")) {
 			act(RandomSOCIAL->char_found, ch, NULL, victim, TO_CHAR);
 		}
+
 		if (str_cmp(RandomSOCIAL->vict_found, "none")) {
 			act(RandomSOCIAL->vict_found, ch, NULL, victim, TO_VICT);
 		}
 
-		if (IS_NPC(victim)
-				&& !IS_AFFECTED(victim, AFF_CHARM)
-				&& IS_AWAKE(victim) && victim->desc == NULL) {
+		if (IS_NPC(victim) && !IS_AFFECTED(victim, AFF_CHARM) && IS_AWAKE(victim) && victim->desc == NULL) {
 			switch (number_bits(4)) {
 			case 0:
-
 			case 1:
 			case 2:
 			case 3:
@@ -1369,15 +1378,17 @@ void do_mprandomsocial(CHAR_DATA *ch, char *argument)
 			case 7:
 			case 8:
 				if (str_cmp(RandomSOCIAL->others_found, "none")) {
-					act(RandomSOCIAL->others_found,
-							victim, NULL, ch, TO_NOTVICT);
+					act(RandomSOCIAL->others_found, victim, NULL, ch, TO_NOTVICT);
 				}
+
 				if (str_cmp(RandomSOCIAL->char_found, "none")) {
 					act(RandomSOCIAL->char_found, victim, NULL, ch, TO_CHAR);
 				}
+
 				if (str_cmp(RandomSOCIAL->vict_found, "none")) {
 					act(RandomSOCIAL->vict_found, victim, NULL, ch, TO_VICT);
 				}
+
 				break;
 
 			case 9:
@@ -1387,8 +1398,11 @@ void do_mprandomsocial(CHAR_DATA *ch, char *argument)
 				act("$n slaps $N.", victim, NULL, ch, TO_NOTVICT);
 				act("You slap $N.", victim, NULL, ch, TO_CHAR);
 				act("$n slaps you.", victim, NULL, ch, TO_VICT);
+
 				break;
 			}
 		}
 	}
+
+	return;
 }
