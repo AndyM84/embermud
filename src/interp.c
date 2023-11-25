@@ -517,18 +517,19 @@ void interpret(CHAR_DATA *ch, char *argument)
 	char command[MAX_INPUT_LENGTH];
 	char *logline;
 	struct cmd_type *cmd;
-	int trust;
 	bool found;
 	bool can_do;
 
 	/*
 	 * Strip leading spaces.
 	 */
-	while (isspace(*argument))
+	while (isspace(*argument)) {
 		argument++;
+	}
 
-	if (!*argument)
+	if (!*argument) {
 		return;
+	}
 
 /*
  * No hiding.
@@ -540,6 +541,7 @@ void interpret(CHAR_DATA *ch, char *argument)
 	 */
 	if (!IS_NPC(ch) && IS_SET(ch->act, PLR_FREEZE)) {
 		send_to_char("You're totally frozen!\n\r", ch);
+		
 		return;
 	}
 
@@ -549,37 +551,43 @@ void interpret(CHAR_DATA *ch, char *argument)
 	 *   also no spaces needed after punctuation.
 	 */
 	logline = argument;
+
 	if (!isalpha(*argument) && !isdigit(*argument)) {
 		*command = *argument++;
 		command[1] = '\0';
-		while (isspace(*argument))
+
+		while (isspace(*argument)) {
 			argument++;
-	} else
+		}
+	} else {
 		argument = one_argument(argument, command);
+	}
 
 /*
  * MUDProg command triggers.
  */
 	if (!IS_NPC(ch)) {
 		can_do = mprog_command_trigger(command, ch, argument);
-		if (!can_do)
+		
+		if (!can_do) {
 			return;
+		}
 	}
 
 	/*
 	 * Look for command in command table.
 	 */
 	found = FALSE;
-	trust = get_trust(ch);
+
 	for (cmd = (struct cmd_type *)cmd_table; *cmd->name; cmd++) {
-		if (*command == LOWER(*cmd->name)
-				&& !str_prefix(command, cmd->name)) {
+		if (*command == LOWER(*cmd->name) && !str_prefix(command, cmd->name)) {
 			 /* if the command is an imm command but the char can't
 				* execute it, keep searching */
 			if ((cmd->imm) && (!can_do_immcmd(ch, cmd->name))) {
 				continue;
 			} else {
 				found = TRUE;
+
 				break;
 			}
 		}
@@ -589,10 +597,13 @@ void interpret(CHAR_DATA *ch, char *argument)
 		char buff[MAX_STRING_LENGTH];
 
 		if (str_prefix(command, "afk")) {
-			sprintf(buff, "`RYou're still AFK!`w - %d message%s waiting.\n\r",
-							ch->pcdata->messages,
-							((ch->pcdata->messages > 1)
-							 || (ch->pcdata->messages < 1)) ? "s" : "");
+			sprintf(
+				buff,
+				"`RYou're still AFK!`w - %d message%s waiting.\n\r",
+					ch->pcdata->messages,
+					((ch->pcdata->messages > 1) || (ch->pcdata->messages < 1)) ? "s" : ""
+			);
+			
 			send_to_char(buff, ch);
 		}
 	}
@@ -600,8 +611,7 @@ void interpret(CHAR_DATA *ch, char *argument)
 	/*
 	 * Log and snoop.
 	 */
-	if ((!IS_NPC(ch) && IS_SET(ch->act, PLR_LOG))
-			|| fLogAll || cmd->log == LOG_ALWAYS) {
+	if ((!IS_NPC(ch) && IS_SET(ch->act, PLR_LOG)) || fLogAll || cmd->log == LOG_ALWAYS) {
 		sprintf(log_buf, "Log %s: %s", ch->name, logline);
 		log_string(log_buf);
 	}
@@ -616,14 +626,18 @@ void interpret(CHAR_DATA *ch, char *argument)
 			/*
 			 * Look for command in socials table.
 			 */
-		if (!check_social(ch, command, argument))
+		if (!check_social(ch, command, argument)) {
 			send_to_char("Huh?\n\r", ch);
+		}
+
 		return;
-	} else /* a normal valid command.. check if it is disabled */
+	} else { /* a normal valid command.. check if it is disabled */
 		if (check_disabled(cmd)) {
 			send_to_char("This command has been temporarily disabled.\n\r", ch);
+			
 			return;
 		}
+	}
 
 		/*
 		 * Character not in position for command?
@@ -632,33 +646,41 @@ void interpret(CHAR_DATA *ch, char *argument)
 		switch (ch->position) {
 		case POS_DEAD:
 			send_to_char("Lie still; you are DEAD.\n\r", ch);
+			
 			break;
 
 		case POS_MORTAL:
 		case POS_INCAP:
 			send_to_char("You are hurt far too bad for that.\n\r", ch);
+			
 			break;
 
 		case POS_STUNNED:
 			send_to_char("You are too stunned to do that.\n\r", ch);
+			
 			break;
 
 		case POS_SLEEPING:
 			send_to_char("In your dreams, or what?\n\r", ch);
+			
 			break;
 
 		case POS_RESTING:
 			send_to_char("Nah... You feel too relaxed...\n\r", ch);
+			
 			break;
 
 		case POS_SITTING:
 			send_to_char("Better stand up first.\n\r", ch);
+			
 			break;
 
 		case POS_FIGHTING:
 			send_to_char("No way!  You are still fighting!\n\r", ch);
+			
 			break;
 		}
+
 		return;
 	}
 
@@ -668,6 +690,7 @@ void interpret(CHAR_DATA *ch, char *argument)
 	(cmd->do_fun) (ch, argument);
 
 	tail_chain();
+
 	return;
 }
 
@@ -680,33 +703,40 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 	bool found;
 
 	found = FALSE;
+
 	for (cmd = social_first; cmd != NULL; cmd = cmd->next) {
 		if ((is_name(command, cmd->name))) {
 			found = TRUE;
+
 			break;
 		}
 	}
 
-	if (!found)
+	if (!found) {
 		return FALSE;
+	}
 
 	if (!IS_NPC(ch) && IS_SET(ch->comm, COMM_NOEMOTE)) {
 		send_to_char("You are anti-social!\n\r", ch);
+		
 		return TRUE;
 	}
 
 	switch (ch->position) {
 	case POS_DEAD:
 		send_to_char("Lie still; you are DEAD.\n\r", ch);
+		
 		return TRUE;
 
 	case POS_INCAP:
 	case POS_MORTAL:
 		send_to_char("You are hurt far too bad for that.\n\r", ch);
+		
 		return TRUE;
 
 	case POS_STUNNED:
 		send_to_char("You are too stunned to do that.\n\r", ch);
+		
 		return TRUE;
 
 	case POS_SLEEPING:
@@ -714,8 +744,10 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 			 * I just know this is the path to a 12" 'if' statement.  :(
 			 * But two players asked for it already!  -- Furey
 			 */
-		if (!str_cmp(cmd->name, "snore"))
+		if (!str_cmp(cmd->name, "snore")) {
 			break;
+		}
+
 		send_to_char("In your dreams, or what?\n\r", ch);
 
 		return TRUE;
@@ -723,23 +755,26 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 
 	one_argument(argument, arg);
 	victim = NULL;
+
 	if (!*arg) {
 		if (str_cmp(cmd->others_no_arg, "none")) {
 			act(cmd->others_no_arg, ch, NULL, victim, TO_ROOM);
 		}
+
 		if (str_cmp(cmd->char_no_arg, "none")) {
 			act(cmd->char_no_arg, ch, NULL, victim, TO_CHAR);
 		}
 	} else if ((victim = get_char_room(ch, arg)) == NULL) {
 		if (!str_cmp(cmd->char_not_found, "none")) {
-
 			send_to_char("There is nothing here that matches that name.", ch);
-		} else
+		} else {
 			act(cmd->char_not_found, ch, NULL, victim, TO_CHAR);
+		}
 	} else if (victim == ch) {
 		if (str_cmp(cmd->others_auto, "none")) {
 			act(cmd->others_auto, ch, NULL, victim, TO_ROOM);
 		}
+
 		if (str_cmp(cmd->char_auto, "none")) {
 			act(cmd->char_auto, ch, NULL, victim, TO_CHAR);
 		}
@@ -747,19 +782,18 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 		if (str_cmp(cmd->others_found, "none")) {
 			act(cmd->others_found, ch, NULL, victim, TO_NOTVICT);
 		}
+
 		if (str_cmp(cmd->char_found, "none")) {
 			act(cmd->char_found, ch, NULL, victim, TO_CHAR);
 		}
+
 		if (str_cmp(cmd->vict_found, "none")) {
 			act(cmd->vict_found, ch, NULL, victim, TO_VICT);
 		}
 
-		if (!IS_NPC(ch) && IS_NPC(victim)
-				&& !IS_AFFECTED(victim, AFF_CHARM)
-				&& IS_AWAKE(victim) && victim->desc == NULL) {
+		if (!IS_NPC(ch) && IS_NPC(victim) && !IS_AFFECTED(victim, AFF_CHARM) && IS_AWAKE(victim) && victim->desc == NULL) {
 			switch (number_bits(4)) {
 			case 0:
-
 			case 1:
 			case 2:
 			case 3:
@@ -771,12 +805,15 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 				if (str_cmp(cmd->others_found, "none")) {
 					act(cmd->others_found, victim, NULL, ch, TO_NOTVICT);
 				}
+
 				if (str_cmp(cmd->char_found, "none")) {
 					act(cmd->char_found, victim, NULL, ch, TO_CHAR);
 				}
+
 				if (str_cmp(cmd->vict_found, "none")) {
 					act(cmd->vict_found, victim, NULL, ch, TO_VICT);
 				}
+
 				break;
 
 			case 9:
@@ -786,6 +823,7 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 				act("$n slaps $N.", victim, NULL, ch, TO_NOTVICT);
 				act("You slap $N.", victim, NULL, ch, TO_CHAR);
 				act("$n slaps you.", victim, NULL, ch, TO_VICT);
+
 				break;
 			}
 		}
@@ -800,15 +838,18 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
 bool is_number(char *arg)
 {
 
-	if (*arg == '\0')
+	if (*arg == '\0') {
 		return FALSE;
+	}
 
-	if (*arg == '+' || *arg == '-')
+	if (*arg == '+' || *arg == '-') {
 		arg++;
+	}
 
 	for (; *arg != '\0'; arg++) {
-		if (!isdigit(*arg))
+		if (!isdigit(*arg)) {
 			return FALSE;
+		}
 	}
 
 	return TRUE;
@@ -828,11 +869,13 @@ int number_argument(char *argument, char *arg)
 			number = atoi(argument);
 			*pdot = '.';
 			strcpy(arg, pdot + 1);
+
 			return number;
 		}
 	}
 
 	strcpy(arg, argument);
+
 	return 1;
 }
 
@@ -919,7 +962,6 @@ void chk_command(CHAR_DATA *ch, char *argument)
 	int pos;
 	int var;
 	int cmd;
-	int trust;
 	bool found;
 
 	strcpy(workstr, argument);
@@ -929,17 +971,21 @@ void chk_command(CHAR_DATA *ch, char *argument)
 	 * Strip leading spaces.
 	 */
 	pos = 0;
-	while (isspace(workstr[pos]))
+	
+	while (isspace(workstr[pos])) {
 		pos++;
+	}
 
-	if (workstr[pos] == '\0')
+	if (workstr[pos] == '\0') {
 		return;
+	}
 
 /*
  * Implement freeze command.
  */
-	if (!IS_NPC(ch) && IS_SET(ch->act, PLR_FREEZE))
+	if (!IS_NPC(ch) && IS_SET(ch->act, PLR_FREEZE)) {
 		return;
+	}
 
 /*
  * Grab the command word.
@@ -949,102 +995,122 @@ void chk_command(CHAR_DATA *ch, char *argument)
 	if (!isalpha(workstr[pos]) && !isdigit(workstr[pos])) {
 		command[0] = workstr[pos];
 		command[1] = '\0';
-		while (isspace(workstr[pos]))
+		
+		while (isspace(workstr[pos])) {
 			pos++;
+		}
 	} else {
 		var = 0;
+		
 		while (!isspace(workstr[pos])) {
-			if (workstr[pos] == '\0')
+			if (workstr[pos] == '\0') {
 				break;
+			}
 
 			command[var] = workstr[pos];
 			var++;
 			pos++;
 		}
+
 		command[pos] = '\0';
-		while (isspace(workstr[pos]))
+
+		while (isspace(workstr[pos])) {
 			pos++;
+		}
 	}
 
 	/*
 	 * Look for command in command table.
 	 */
 	found = FALSE;
-	trust = get_trust(ch);
+
 	for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
-		if (command[0] == cmd_table[cmd].name[0]
-				&& !str_prefix(command, cmd_table[cmd].name)) {
+		if (command[0] == cmd_table[cmd].name[0] && !str_prefix(command, cmd_table[cmd].name)) {
 			 /* if the command is an imm command but the char can't
 					execute it, keep searching. */
 
-			if ((cmd_table[cmd].imm)
-					&& (!can_do_immcmd(ch, cmd_table[cmd].name))) {
+			if ((cmd_table[cmd].imm)&& (!can_do_immcmd(ch, cmd_table[cmd].name))) {
 				continue;
 			} else {
 				found = TRUE;
 				sprintf(argument, "%s", cmd_table[cmd].name);
+
 				break;
 			}
 		}
 	}
 
 	if (found) {
-		if (ch->position < cmd_table[cmd].position)
+		if (ch->position < cmd_table[cmd].position) {
 			found = FALSE;      /* Character not in position for command */
+		}
 	} else {
 
 			/* Look for command in social table */
 		SOCIALLIST_DATA *cmd;
+		
 		for (cmd = social_first; cmd != NULL; cmd = cmd->next) {
 			if ((is_name(command, cmd->name))) {
 				found = TRUE;
 				sprintf(argument, "%s", cmd->name);
+
 				break;
 			}
 		}
 
 		if (found) {
-			if (!IS_NPC(ch) && IS_SET(ch->comm, COMM_NOEMOTE))
+			if (!IS_NPC(ch) && IS_SET(ch->comm, COMM_NOEMOTE)) {
 				found = FALSE;
-			else {
+			}	else {
 				switch (ch->position) {
 				case POS_DEAD:
 				case POS_INCAP:
 				case POS_MORTAL:
 				case POS_STUNNED:
 					found = FALSE;
+					
 					break;
 
 				case POS_SLEEPING:
-					if (str_cmp(cmd->name, "snore"))
+					if (str_cmp(cmd->name, "snore")) {
 						found = FALSE;
+					}
+
 					break;
 				}
 			}
 		}
+
 		if (found) {
 			var = 0;
+
 			while (!isspace(workstr[pos])) {
-				if (workstr[pos] == '\0')
+				if (workstr[pos] == '\0') {
 					return;
+				}
 
 				arg[var] = workstr[pos];
 				pos++;
 				var++;
 			}
+
 			arg[var] = '\0';
 
 			victim = NULL;
+
 			if (arg[0] != '\0') {
 				victim = get_char_room(ch, arg);
-				if (victim == NULL)
+
+				if (victim == NULL) {
 					found = FALSE;
+				}
 			}
 		}
 	}
 
-	if (!found)
+	if (!found) {
 		argument[0] = '\0';
+	}
 
 	return;
 }
@@ -1059,17 +1125,22 @@ void do_commands(CHAR_DATA *ch, char *argument)
 	int col;
 
 	col = 0;
+
 	for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
 		if (!cmd_table[cmd].imm && cmd_table[cmd].show) {
 			sprintf(buf, "%-12s", cmd_table[cmd].name);
 			send_to_char(buf, ch);
-			if (++col % 6 == 0)
+
+			if (++col % 6 == 0) {
 				send_to_char("\n\r", ch);
+			}
 		}
 	}
 
-	if (col % 6 != 0)
+	if (col % 6 != 0) {
 		send_to_char("\n\r", ch);
+	}
+
 	return;
 }
 
@@ -1080,23 +1151,31 @@ void do_wizhelp(CHAR_DATA *ch, char *argument)
 	int col;
 
 	col = 0;
+
 	for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
-		if (cmd_table[cmd].imm && can_do_immcmd(ch, cmd_table[cmd].name)
-				&& cmd_table[cmd].show) {
-			sprintf(buf, "%s%-12s`w",
-							check_disabled(&cmd_table[cmd]) ? "`K-" : "`w ",
-							cmd_table[cmd].name);
+		if (cmd_table[cmd].imm && can_do_immcmd(ch, cmd_table[cmd].name) && cmd_table[cmd].show) {
+			sprintf(
+				buf,
+				"%s%-12s`w",
+					check_disabled(&cmd_table[cmd]) ? "`K-" : "`w ",
+					cmd_table[cmd].name
+			);
+
 			send_to_char(buf, ch);
-			if (++col % 6 == 0)
+
+			if (++col % 6 == 0) {
 				send_to_char("\n\r", ch);
+			}
 		}
 	}
 
-	if (col % 6 != 0)
+	if (col % 6 != 0) {
 		send_to_char("\n\r", ch);
+	}
 
-	if (!IS_NPC(ch) && ch->pcdata->immcmdlist == NULL)
+	if (!IS_NPC(ch) && ch->pcdata->immcmdlist == NULL) {
 		send_to_char("Huh?\n\r", ch);
+	}
 
 	return;
 }
@@ -1107,16 +1186,18 @@ void mpinterpret(CHAR_DATA *ch, char *argument)
 	char command[MAX_INPUT_LENGTH];
 	char logline[MAX_INPUT_LENGTH];
 	int cmd;
-	int trust;
 	bool found;
 
 	/*
 	 * Strip leading spaces.
 	 */
-	while (isspace(*argument))
+	while (isspace(*argument)) {
 		argument++;
-	if (argument[0] == '\0')
+	}
+
+	if (argument[0] == '\0') {
 		return;
+	}
 
 /*
  * Grab the command word.
@@ -1124,12 +1205,15 @@ void mpinterpret(CHAR_DATA *ch, char *argument)
  *   also no spaces needed after punctuation.
  */
 	strcpy(logline, argument);
+	
 	if (!isalpha(argument[0]) && !isdigit(argument[0])) {
 		command[0] = argument[0];
 		command[1] = '\0';
 		argument++;
-		while (isspace(*argument))
+		
+		while (isspace(*argument)) {
 			argument++;
+		}
 	} else {
 		argument = one_argument(argument, command);
 	}
@@ -1138,12 +1222,11 @@ void mpinterpret(CHAR_DATA *ch, char *argument)
 	 * Look for command in command table.
 	 */
 	found = FALSE;
-	trust = get_trust(ch);
+
 	for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
-		if (command[0] == cmd_table[cmd].name[0]
-				&& !str_prefix(command, cmd_table[cmd].name)
-				&& !cmd_table[cmd].imm) {
+		if (command[0] == cmd_table[cmd].name[0] && !str_prefix(command, cmd_table[cmd].name) && !cmd_table[cmd].imm) {
 			found = TRUE;
+
 			break;
 		}
 	}
@@ -1152,8 +1235,10 @@ void mpinterpret(CHAR_DATA *ch, char *argument)
 			/*
 			 * Look for command in socials table.
 			 */
-		if (!check_social(ch, command, argument))
+		if (!check_social(ch, command, argument)) {
 			send_to_char("Huh?\n\r", ch);
+		}
+
 		return;
 	}
 
@@ -1171,6 +1256,7 @@ void mpinterpret(CHAR_DATA *ch, char *argument)
 	(*cmd_table[cmd].do_fun) (ch, argument);
 
 	tail_chain();
+
 	return;
 }
 
