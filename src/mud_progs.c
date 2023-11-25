@@ -136,6 +136,7 @@ char *parse_script(char *script)
 		while (isspace(*ptr))
 			if (*++ptr == '\0') {
 				bug("Parse_Script: Script ended without 'break'.\r\n");
+
 				return NULL;
 			}
 
@@ -149,50 +150,65 @@ char *parse_script(char *script)
 				buf[--pos] = '\0';
 
 				if (!strcmp(buf, "if")) {
-					while (isspace(*ptr))
+					while (isspace(*ptr)) {
 						ptr++;
+					}
 
 					if (*ptr != '(') {
 						bug("Parse_Script: Syntax error - If statment missing opening '('.\r\n");
+
 						return NULL;
 					}
 
-					if ((ptr = parse_if(ptr)) == NULL)
+					if ((ptr = parse_if(ptr)) == NULL) {
 						return NULL;
+					}
+
 					break;
 				} else if (!strcmp(buf, "break")) {
 					if (*ptr == '(') {
 						bug("Parse_Script: Syntax error - '(' encountered after 'break'.\r\n");
+
 						return NULL;
 					}
+
 					return NULL;
 				} else if (!strcmp(buf, "else")) {
 					if (*ptr == '(') {
 						bug("Parse_Script: Syntax error - '(' encountered after 'else'.\r\n");
+					
 						return NULL;
 					}
+					
 					return curr;
-				} else if (!strcmp(buf, "elseif"))
+				} else if (!strcmp(buf, "elseif")) {
 					return curr;
-				else if (!strcmp(buf, "endif")) {
+				} else if (!strcmp(buf, "endif")) {
 					if (*ptr == '(') {
 						bug("Parse_Script: Syntax error - '(' encountered after 'endif'.\r\n");
+
 						return NULL;
 					}
+
 					return curr;
 				} else {
 					if (*ptr == '(') {
 						bug("Parse_Script: Syntax error - '(' encountered after a command.\r\n");
+
 						return NULL;
 					}
-					if ((ptr = parse_command(curr)) == NULL)
+
+					if ((ptr = parse_command(curr)) == NULL) {
 						return NULL;
+					}
+
 					break;
 				}
 			}
 
-			if (++ptr == '\0') {
+			if (*(++ptr) == '\0') {
 				bug("Parse_Script: EOF encountered in read.\r\n");
+				
 				return NULL;
 			}
 		}
@@ -216,37 +232,44 @@ char *parse_if(char *instring)
 	bool elsedone = FALSE;
 
 	/* Skip leading spaces */
-	while (isspace(*ptr))
-		if (++ptr == '\0') {
+	while (isspace(*ptr)) {
+		if (*(++ptr) == '\0') {
 			bug("Parse_If: EOF encountered in read.\r\n");
+			
 			return NULL;
 		}
+	}
 
 /* Evaluate the conditional portion of the if statement */
 	while (1) {
 		if (isspace(*ptr)) {
 			ptr++;
+			
 			continue;
 		} else if (*ptr == '(') {
 			if (parans++ == 0) {
 				ptr++;
+				
 				continue;
 			}
-
 		} else if (*ptr == ')') {
 			parans--;
 
 			if (parans < 0) {
 				bug("Parse_If: ')' without prior '('.\r\n");
+				
 				return NULL;
 			} else if (parans == 0) {
 					/* Check to make sure we don't have an extra ')' */
 				tmpptr = ++ptr;
-				while (*tmpptr && *tmpptr != '(')
+				
+				while (*tmpptr && *tmpptr != '(') {
 					if (*tmpptr++ == ')') {
 						bug("Parse_If: Too many ')'s.\r\n");
+						
 						return NULL;
 					}
+				}
 
 				buf[pos] = '\0';
 				ifvalue = parse_expression(buf);
@@ -259,24 +282,29 @@ char *parse_if(char *instring)
 
 		if (*ptr == '\0') {
 			bug("Parse_If: Missing ')' in script.\r\n");
+			
 			return NULL;
 		}
 	}
 
 	/* Call parse_script again.  This will process commands and allow for nested if's */
-	if (ifvalue)
-		if ((ptr = parse_script(ptr)) == NULL)
+	if (ifvalue) {
+		if ((ptr = parse_script(ptr)) == NULL) {
 			return NULL;
+		}
+	}
 
 /* Check for elseif and endif */
 
 	while (1) {
 			/* Skip leading spaces */
-		while (isspace(*ptr))
-			if (++ptr == '\0') {
+		while (isspace(*ptr)) {
+			if (*(++ptr) == '\0') {
 				bug("Parse_If: EOF encountered in read.\r\n");
+
 				return NULL;
 			}
+		}
 
 		pos = 0;
 
@@ -297,33 +325,40 @@ char *parse_if(char *instring)
 					if ((ptr = parse_script(ptr)) == NULL)
 						return NULL;
 
-					while (isspace(*ptr))
-						if (++ptr == '\0') {
+					while (isspace(*ptr)) {
+						if (*(++ptr) == '\0') {
 							bug("Parse_If: EOF encountered in read.\r\n");
+						
 							return NULL;
 						}
+					}
 
 					break;
 				} else if (!strcmp(buf, "elseif")) {
-					while (isspace(*ptr))
+					while (isspace(*ptr)) {
 						ptr++;
+					}
 
 					if (*ptr != '(') {
 						bug("Parse_If: Syntax error - Elseif statment missing opening '('.\r\n");
+						
 						return NULL;
 					}
 
-					if (!ifvalue)
+					if (!ifvalue) {
 						return (ptr = parse_if(ptr));
+					}
 
 				/* read to the end of the line */
-					while (*ptr != '\r' && *ptr != '\n' && *ptr != '\0')
+					while (*ptr != '\r' && *ptr != '\n' && *ptr != '\0') {
 						ptr++;
+					}
 
 					break;
 				} else if (!strcmp(buf, "endif")) {
 					if (*ptr == '(') {
 						bug("Parse_If: Syntax error - '(' encountered after 'endif'.\r\n");
+						
 						return NULL;
 					}
 
@@ -335,15 +370,17 @@ char *parse_if(char *instring)
 						 */
 
 						/* read to the end of the line */
-					while (*ptr != '\r' && *ptr != '\n' && *ptr != '\0')
+					while (*ptr != '\r' && *ptr != '\n' && *ptr != '\0') {
 						ptr++;
+					}
 
 					break;
 				}
 			}
 
-			if (++ptr == '\0') {
+			if (*(++ptr) == '\0') {
 				bug("Parse_If: EOF encountered in read.\r\n");
+			
 				return NULL;
 			}
 		}
@@ -1212,29 +1249,29 @@ void mprog_wordlist_check(char *arg, int trigger_type, int prog_type)
 
 	}
 
-	for (; pProgList; pProgList = pProgList->next)
+	for (; pProgList; pProgList = pProgList->next) {
 		if (pProgList->mudprog->trigger_type & trigger_type) {
 			mprg = pProgList->mudprog;
 
 			strcpy(temp1, mprg->arglist);
 			list = temp1;
 
-			for (i = 0; i < strlen(list); i++)
+			for (i = 0; i < strlen(list); i++) {
 				list[i] = LOWER(list[i]);
+			}
 
 			strcpy(temp2, arg);
 			dupl = remove_color(temp2);
 
-			for (i = 0; i < strlen(dupl); i++)
+			for (i = 0; i < strlen(dupl); i++) {
 				dupl[i] = LOWER(dupl[i]);
+			}
 
 			if ((list[0] == 'p') && (list[1] == ' ')) {
 				list += 2;
-				while ((start = strstr(dupl, list)))
-					if ((start == dupl || *(start - 1) == ' ')
-							&& (*(end = start + strlen(list)) == ' '
-									|| *end == '\n'
-									|| *end == '\r' || *end == '\0')) {
+
+				while ((start = strstr(dupl, list))) {
+					if ((start == dupl || *(start - 1) == ' ') && (*(end = start + strlen(list)) == ' ' || *end == '\n' || *end == '\r' || *end == '\0')) {
 						if (prog_type == OBJ_PROG) {
 							set_supermob(ProgObjectSource, prog_type);
 							ProgSource = supermob;
@@ -1245,20 +1282,21 @@ void mprog_wordlist_check(char *arg, int trigger_type, int prog_type)
 
 						mprog_driver(mprg->comlist);
 
-						if (ProgSource == supermob)
+						if (ProgSource == supermob) {
 							release_supermob();
+						}
 
 						break;
-					} else
+					} else {
 						dupl = start + 1;
+					}
+				}
 			} else {
 				list = one_argument(list, word);
-				for (; word[0] != '\0'; list = one_argument(list, word))
-					while ((start = strstr(dupl, word)))
-						if ((start == dupl || *(start - 1) == ' ')
-								&& (*(end = start + strlen(word)) == ' '
-										|| *end == '\n'
-										|| *end == '\r' || *end == '\0')) {
+
+				for (; word[0] != '\0'; list = one_argument(list, word)) {
+					while ((start = strstr(dupl, word))) {
+						if ((start == dupl || *(start - 1) == ' ') && (*(end = start + strlen(word)) == ' ' || *end == '\n' || *end == '\r' || *end == '\0')) {
 							if (prog_type == OBJ_PROG) {
 								set_supermob(ProgObjectSource, prog_type);
 								ProgSource = supermob;
@@ -1273,10 +1311,15 @@ void mprog_wordlist_check(char *arg, int trigger_type, int prog_type)
 								release_supermob();
 
 							break;
-						} else
+						} else {
 							dupl = start + 1;
+						}
+					}
+				}
 			}
 		}
+	}
+
 	return;
 }
 
@@ -1292,16 +1335,18 @@ void mprog_act_trigger(char *txt, CHAR_DATA *actor)
 {
 	CHAR_DATA *vmob;
 
-	for (vmob = actor->in_room->people; vmob; vmob = vmob->next_in_room)
+	for (vmob = actor->in_room->people; vmob; vmob = vmob->next_in_room) {
 		if (IS_NPC(vmob) && (vmob->pIndexData->progtypes & ACT_PROG)) {
-			if (IS_NPC(actor) && (vmob->pIndexData == actor->pIndexData))
+			if (IS_NPC(actor) && (vmob->pIndexData == actor->pIndexData)) {
 				continue;
+			}
 
 			ProgSource = vmob;
 			ProgTriggeredBy = actor;
 
 			mprog_wordlist_check(txt, ACT_PROG, MOB_PROG);
 		}
+	}
 
 	return;
 }
@@ -1313,8 +1358,10 @@ void mprog_bribe_trigger(CHAR_DATA *mob, CHAR_DATA *ch, int amount)
 	OBJ_DATA *obj;
 
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & BRIBE_PROG)) {
-		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData)
+		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData) {
 			return;
+		}
+
 		obj = create_object(get_obj_index(OBJ_VNUM_MONEY_SOME), 0);
 		sprintf(buf, obj->short_descr, amount);
 		free_string(&obj->short_descr);
@@ -1323,16 +1370,17 @@ void mprog_bribe_trigger(CHAR_DATA *mob, CHAR_DATA *ch, int amount)
 		obj_to_char(obj, mob);
 		mob->gold -= amount;
 
-		for (pList = mob->pIndexData->mudprogs; pList; pList = pList->next)
-			if ((pList->mudprog->trigger_type & BRIBE_PROG)
-					&& (amount >= atoi(pList->mudprog->arglist))) {
+		for (pList = mob->pIndexData->mudprogs; pList; pList = pList->next) {
+			if ((pList->mudprog->trigger_type & BRIBE_PROG) && (amount >= atoi(pList->mudprog->arglist))) {
 				ProgSource = mob;
 				ProgTriggeredBy = ch;
 				ProgObjectSource = obj;
 
 				mprog_driver(pList->mudprog->comlist);
+
 				break;
 			}
+		}
 	}
 
 	return;
@@ -1340,7 +1388,6 @@ void mprog_bribe_trigger(CHAR_DATA *mob, CHAR_DATA *ch, int amount)
 
 void mprog_death_trigger(CHAR_DATA *mob)
 {
-
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & DEATH_PROG)) {
 		mob->position = POS_RESTING;
 
@@ -1350,12 +1397,12 @@ void mprog_death_trigger(CHAR_DATA *mob)
 	} else {
 		death_cry(mob);
 	}
+
 	return;
 }
 
 void mprog_entry_trigger(CHAR_DATA *mob)
 {
-
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & ENTRY_PROG)) {
 		ProgSource = mob;
 		mprog_percent_check(ENTRY_PROG);
@@ -1369,8 +1416,9 @@ void mprog_fight_trigger(CHAR_DATA *mob, CHAR_DATA *ch)
 {
 
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & FIGHT_PROG)) {
-		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData)
+		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData) {
 			return;
+		}
 
 		ProgSource = mob;
 		ProgTriggeredBy = ch;
@@ -1385,18 +1433,20 @@ void mprog_fightgroup_trigger(CHAR_DATA *mob)
 {
 	CHAR_DATA *victim;
 
-	if (!mob || !mob->in_room)
+	if (!mob || !mob->in_room) {
 		return;
+	}
 
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & FIGHTGROUP_PROG)) {
 		ProgSource = mob;
 
-		for (victim = mob->in_room->people; victim;
-				 victim = victim->next_in_room) {
+		for (victim = mob->in_room->people; victim; victim = victim->next_in_room) {
 			if (victim != mob && victim->fighting == mob) {
 				ProgTriggeredBy = victim;
-				if (mprog_percent_check(FIGHTGROUP_PROG))
+
+				if (mprog_percent_check(FIGHTGROUP_PROG)) {
 					break;
+				}
 			}
 		}
 	}
@@ -1411,20 +1461,20 @@ void mprog_give_trigger(CHAR_DATA *mob, CHAR_DATA *ch, OBJ_DATA *obj)
 	MPROG_LIST *pList;
 
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & GIVE_PROG)) {
-		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData)
+		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData) {
 			return;
+		}
 
 		for (pList = mob->pIndexData->mudprogs; pList; pList = pList->next) {
 			one_argument(pList->mudprog->arglist, buf);
 
-			if ((pList->mudprog->trigger_type & GIVE_PROG)
-					&& ((!str_cmp(obj->name, pList->mudprog->arglist))
-							|| (!str_cmp("all", buf)))) {
+			if ((pList->mudprog->trigger_type & GIVE_PROG) && ((!str_cmp(obj->name, pList->mudprog->arglist)) || (!str_cmp("all", buf)))) {
 				ProgSource = mob;
 				ProgTriggeredBy = ch;
 				ProgObjectSource = obj;
 
 				mprog_driver(pList->mudprog->comlist);
+				
 				break;
 			}
 		}
@@ -1437,28 +1487,25 @@ void mprog_greet_trigger(CHAR_DATA *ch)
 {
 	CHAR_DATA *vmob;
 
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
-	for (vmob = ch->in_room->people; vmob; vmob = vmob->next_in_room)
-		if (IS_NPC(vmob) && ch != vmob && can_see(vmob, ch)
-				&& (!vmob->fighting) && IS_AWAKE(vmob)
-				&& (vmob->pIndexData->progtypes & GREET_PROG)) {
+	for (vmob = ch->in_room->people; vmob; vmob = vmob->next_in_room) {
+		if (IS_NPC(vmob) && ch != vmob && can_see(vmob, ch) && (!vmob->fighting) && IS_AWAKE(vmob) && (vmob->pIndexData->progtypes & GREET_PROG)) {
 			ProgSource = vmob;
 			ProgTriggeredBy = ch;
 
 			mprog_percent_check(GREET_PROG);
-		} else if (IS_NPC(vmob)
-							&& (!vmob->fighting)
-							&& IS_AWAKE(vmob)
-							&& (vmob->pIndexData->progtypes & ALL_GREET_PROG)) {
+		} else if (IS_NPC(vmob) && (!vmob->fighting) && IS_AWAKE(vmob) && (vmob->pIndexData->progtypes & ALL_GREET_PROG)) {
 			ProgSource = vmob;
 			ProgTriggeredBy = ch;
 
 			mprog_percent_check(ALL_GREET_PROG);
 		}
+	}
 
-		return;
+	return;
 }
 
 void mprog_hitprcnt_trigger(CHAR_DATA *mob, CHAR_DATA *ch)
@@ -1466,19 +1513,20 @@ void mprog_hitprcnt_trigger(CHAR_DATA *mob, CHAR_DATA *ch)
 	MPROG_LIST *pList;
 
 	if (IS_NPC(mob) && (mob->pIndexData->progtypes & HITPRCNT_PROG)) {
-		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData)
+		if (IS_NPC(ch) && ch->pIndexData == mob->pIndexData) {
 			return;
+		}
 
-		for (pList = mob->pIndexData->mudprogs; pList; pList = pList->next)
-			if ((pList->mudprog->trigger_type & HITPRCNT_PROG)
-					&& ((100 * mob->hit / mob->max_hit) <
-							atoi(pList->mudprog->arglist))) {
+		for (pList = mob->pIndexData->mudprogs; pList; pList = pList->next) {
+			if ((pList->mudprog->trigger_type & HITPRCNT_PROG) && ((100 * mob->hit / mob->max_hit) < atoi(pList->mudprog->arglist))) {
 				ProgSource = mob;
 				ProgTriggeredBy = ch;
 
 				mprog_driver(pList->mudprog->comlist);
+
 				break;
 			}
+		}
 	}
 
 	return;
@@ -1499,16 +1547,18 @@ void mprog_speech_trigger(char *txt, CHAR_DATA *actor)
 {
 	CHAR_DATA *vmob;
 
-	for (vmob = actor->in_room->people; vmob; vmob = vmob->next_in_room)
+	for (vmob = actor->in_room->people; vmob; vmob = vmob->next_in_room) {
 		if (IS_NPC(vmob) && (vmob->pIndexData->progtypes & SPEECH_PROG)) {
-			if (IS_NPC(actor) && (vmob->pIndexData == actor->pIndexData))
+			if (IS_NPC(actor) && (vmob->pIndexData == actor->pIndexData)) {
 				continue;
+			}
 
 			ProgSource = vmob;
 			ProgTriggeredBy = actor;
 
 			mprog_wordlist_check(txt, SPEECH_PROG, MOB_PROG);
 		}
+	}
 
 	return;
 }
@@ -1522,9 +1572,9 @@ void mprog_speech_trigger(char *txt, CHAR_DATA *actor)
 bool mprog_command_trigger(char *txt, CHAR_DATA *ch, char *extra)
 {
 	char *argument;
-	char arg[MAX_INPUT_LENGTH]; /* I'm assuming that the cmd_table won't
-															 * ever have a command longer than
-															 * MAX_INPUT_LENGTH                     */
+	char arg[MAX_INPUT_LENGTH + 1]; /* I'm assuming that the cmd_table won't
+															     * ever have a command longer than
+															     * MAX_INPUT_LENGTH                     */
 	char *pMem;                 /* Pointer to the memory allocated by argument.
 															 * This is needed so we can free that memory up
 															 * at the end of the function */
@@ -1542,22 +1592,21 @@ bool mprog_command_trigger(char *txt, CHAR_DATA *ch, char *extra)
 	 * the regular command table, and expand it to the full command. */
 
 	argument = one_argument(argument, arg);
+
 	for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
-		if (arg[0] == cmd_table[cmd].name[0]
-				&& !str_prefix(arg, cmd_table[cmd].name)) {
-			strncpy(arg, cmd_table[cmd].name, sizeof(arg));
+		if (arg[0] == cmd_table[cmd].name[0] && !str_prefix(arg, cmd_table[cmd].name)) {
+			strncpy(arg, cmd_table[cmd].name, sizeof(arg) - 1);
+			
 			break;
 		}
 	}
 
 	/* Find mobs that are in_room that have a COMMAND_PROG */
 
-	for (vmob = ch->in_room->people; vmob; vmob = vmob->next_in_room)
+	for (vmob = ch->in_room->people; vmob; vmob = vmob->next_in_room) {
 		if (IS_NPC(vmob) && (vmob->pIndexData->progtypes & COMMAND_PROG)) {
-			for (pList = vmob->pIndexData->mudprogs; pList;
-					 pList = pList->next) {
-				if ((pList->mudprog->trigger_type & COMMAND_PROG)
-						&& (!str_cmp(pList->mudprog->arglist, arg))) {
+			for (pList = vmob->pIndexData->mudprogs; pList; pList = pList->next) {
+				if ((pList->mudprog->trigger_type & COMMAND_PROG) && (!str_cmp(pList->mudprog->arglist, arg))) {
 					ProgSource = vmob;
 					ProgTriggeredBy = ch;
 					ProgExtraArgs = extra;
@@ -1567,16 +1616,15 @@ bool mprog_command_trigger(char *txt, CHAR_DATA *ch, char *extra)
 				}
 			}
 		}
+	}
 
 /* Obj and Room command_prog support by Kyle Boyd */
 
 /* objs in inventory and worn... */
-	for (obj = ch->carrying; obj; obj = obj->next_content)
+	for (obj = ch->carrying; obj; obj = obj->next_content) {
 		if (obj->pIndexData->progtypes & COMMAND_PROG) {
-			for (pList = obj->pIndexData->mudprogs; pList;
-					 pList = pList->next) {
-				if ((pList->mudprog->trigger_type & COMMAND_PROG)
-						&& (!str_cmp(pList->mudprog->arglist, arg))) {
+			for (pList = obj->pIndexData->mudprogs; pList; pList = pList->next) {
+				if ((pList->mudprog->trigger_type & COMMAND_PROG) && (!str_cmp(pList->mudprog->arglist, arg))) {
 					set_supermob(obj, OBJ_PROG);
 					ProgSource = supermob;
 					ProgTriggeredBy = ch;
@@ -1590,15 +1638,14 @@ bool mprog_command_trigger(char *txt, CHAR_DATA *ch, char *extra)
 				}
 			}
 		}
+	}
 
 /* objs in room... */
 
-	for (obj = ch->in_room->contents; obj; obj = obj->next_content)
+	for (obj = ch->in_room->contents; obj; obj = obj->next_content) {
 		if (obj->pIndexData->progtypes & COMMAND_PROG) {
-			for (pList = obj->pIndexData->mudprogs; pList;
-					 pList = pList->next) {
-				if ((pList->mudprog->trigger_type & COMMAND_PROG)
-						&& (!str_cmp(pList->mudprog->arglist, arg))) {
+			for (pList = obj->pIndexData->mudprogs; pList; pList = pList->next) {
+				if ((pList->mudprog->trigger_type & COMMAND_PROG) && (!str_cmp(pList->mudprog->arglist, arg))) {
 					set_supermob(obj, OBJ_PROG);
 					ProgSource = supermob;
 					ProgTriggeredBy = ch;
@@ -1612,14 +1659,15 @@ bool mprog_command_trigger(char *txt, CHAR_DATA *ch, char *extra)
 				}
 			}
 		}
+	}
 
 /* And finally, room progs */
 
 	room = ch->in_room;
+
 	if (room->progtypes & COMMAND_PROG) {
 		for (pList = room->mudprogs; pList; pList = pList->next) {
-			if ((pList->mudprog->trigger_type & COMMAND_PROG)
-					&& (!str_cmp(pList->mudprog->arglist, arg))) {
+			if ((pList->mudprog->trigger_type & COMMAND_PROG) && (!str_cmp(pList->mudprog->arglist, arg))) {
 				set_supermob(room, ROOM_PROG);
 				ProgSource = supermob;
 				ProgTriggeredBy = ch;
