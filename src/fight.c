@@ -47,31 +47,25 @@ bool check_block args((CHAR_DATA *ch, CHAR_DATA *victim));
 bool check_dodge args((CHAR_DATA *ch, CHAR_DATA *victim));
 void check_killer args((CHAR_DATA *ch, CHAR_DATA *victim));
 bool check_parry args((CHAR_DATA *ch, CHAR_DATA *victim));
-void dam_message args((CHAR_DATA *ch, CHAR_DATA *victim, int dam,
-											 int dt, bool immune));
+void dam_message args((CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt, bool immune));
 void death_cry args((CHAR_DATA *ch));
 void group_gain args((CHAR_DATA *ch, CHAR_DATA *victim));
-int xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim,
-										 int total_levels, int members));
-int hit_xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim,
-												 int total_levels, int members, int dam));
-int cast_xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim,
-													int total_levels, int members, int dam));
+int xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim, int total_levels, int members));
+int hit_xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim, int total_levels, int members, int dam));
+int cast_xp_compute args((CHAR_DATA *gch, CHAR_DATA *victim, int total_levels, int members, int dam));
 bool is_safe args((CHAR_DATA *ch, CHAR_DATA *victim));
 void make_corpse args((CHAR_DATA *ch));
 void make_pk_corpse args((CHAR_DATA *ch));
-void one_hit
-args((CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DATA *weapon, int dt));
+void one_hit args((CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DATA *weapon, int dt));
 void mob_hit args((CHAR_DATA *ch, CHAR_DATA *victim, int dt));
 void chaos_kill args((CHAR_DATA *victim));
 void pk_kill args((CHAR_DATA *victim));
 void raw_kill args((CHAR_DATA *victim));
 void set_fighting args((CHAR_DATA *ch, CHAR_DATA *victim));
-void disarm
-args((CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DATA *target_weapon));
+void disarm args((CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DATA *target_weapon));
 void chaos_log args((CHAR_DATA *ch, char *argument));
-bool vorpal_kill(CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt,
-								 int dam_type);
+bool vorpal_kill(CHAR_DATA *ch, CHAR_DATA *victim, int dam, int dt, int dam_type);
+
 extern bool chaos;
 extern bool gsilentdamage;
 extern bool can_use(CHAR_DATA *ch, long sn);
@@ -83,23 +77,22 @@ extern bool can_use(CHAR_DATA *ch, long sn);
 void violence_update(void)
 {
 	CHAR_DATA *ch;
-	CHAR_DATA *ch_next;
 	CHAR_DATA *victim;
 
 	for (ch = char_list; ch != NULL; ch = ch->next) {
-		ch_next = ch->next;
-
-		if ((victim = ch->fighting) == NULL || ch->in_room == NULL)
+		if ((victim = ch->fighting) == NULL || ch->in_room == NULL) {
 			continue;
+		}
 
-		if (IS_AWAKE(ch) && ch->in_room == victim->in_room)
+		if (IS_AWAKE(ch) && ch->in_room == victim->in_room) {
 			multi_hit(ch, victim, TYPE_UNDEFINED);
-		else {
+		} else {
 			stop_fighting(ch, FALSE);
 		}
 
-		if ((victim = ch->fighting) == NULL)
+		if ((victim = ch->fighting) == NULL) {
 			continue;
+		}
 
 		rprog_rfight_trigger(ch);
 		mprog_hitprcnt_trigger(ch, victim);
@@ -2168,7 +2161,6 @@ void group_gain(CHAR_DATA *ch, CHAR_DATA *victim)
 {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *gch;
-	CHAR_DATA *lch;
 	int xp = 0;
 	int members;
 	int group_levels;
@@ -2201,8 +2193,6 @@ void group_gain(CHAR_DATA *ch, CHAR_DATA *victim)
 		members = 1;
 		group_levels = ch->level;
 	}
-
-	lch = (ch->leader != NULL) ? ch->leader : ch;
 
 	for (gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room) {
 		OBJ_DATA *obj;

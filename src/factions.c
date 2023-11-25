@@ -199,9 +199,7 @@ void do_factionedit(CHAR_DATA *ch, char *argument)
 			if (factedit_create(ch, argument)) {
 				ch->desc->editor = ED_FACTION;
 				SET_BIT(ch->act, PLR_BUILDING);
-				act("$n has entered the Factions Editor.", ch, NULL, NULL,
-						TO_ROOM);
-
+				act("$n has entered the Factions Editor.", ch, NULL, NULL, TO_ROOM);
 			}
 
 			return;
@@ -209,6 +207,7 @@ void do_factionedit(CHAR_DATA *ch, char *argument)
 	}
 
 	send_to_char("There is no default faction to edit.\n\r", ch);
+
 	return;
 }
 
@@ -221,30 +220,34 @@ void factionedit(CHAR_DATA *ch, char *argument)
 
 	smash_tilde(argument);
 	strncpy(arg, argument, sizeof(arg) - 1);
-	arg[sizeof(arg)] = '\0';
+	arg[sizeof(arg) - 1] = '\0';
 	argument = one_argument(argument, command);
 
 	pFact = (FACTIONLIST_DATA *)ch->desc->pEdit;
 
 	if (!str_cmp(command, "done")) {
 		edit_done(ch);
+
 		return;
 	}
 
 	if (get_trust(ch) < FACTION_EDIT_LEVEL) {
 		send_to_char("Insufficient security to modify factions.\n\r", ch);
 		interpret(ch, arg);
+
 		return;
 	}
 
 	if (command[0] == '\0') {
 		factedit_show(ch, argument);
+
 		return;
 	}
 
 	if (!pFact) {
 		send_to_char("You are not currently editing a faction.\n\r", ch);
 		interpret(ch, arg);
+
 		return;
 	}
 
@@ -461,29 +464,27 @@ void affect_factions(CHAR_DATA *ch, CHAR_DATA *victim)
 {
 	FACTIONAFF_DATA *pFactAff;
 	FACTIONPC_DATA *pFactPC;
-	CHAR_DATA *group_leader, *group_ch;
+	CHAR_DATA *group_ch;
 
 	if (IS_NPC(ch)) {
 		bug("affect_factions: ch is an NPC?  Doing nothing.", 0);
+		
 		return;
 	}
 
 	if (!IS_NPC(victim)) {
 		bug("affect_factions: victim isn't an NPC?  Doing nothing.", 0);
+		
 		return;
 	}
 
-	for (pFactAff = victim->pIndexData->faction_affs;
-			 pFactAff != NULL; pFactAff = pFactAff->next) {
-		group_leader = (ch->leader != NULL) ? ch->leader : ch;
-
-		for (group_ch = player_list; group_ch != NULL;
-				 group_ch = group_ch->next) {
+	for (pFactAff = victim->pIndexData->faction_affs; pFactAff != NULL; pFactAff = pFactAff->next) {
+		for (group_ch = player_list; group_ch != NULL; group_ch = group_ch->next) {
 			if (is_same_group(group_ch, ch)) {
-				for (pFactPC = group_ch->pcdata->faction_standings;
-						 pFactPC != NULL; pFactPC = pFactPC->next) {
-					if (pFactPC->faction == pFactAff->faction)
+				for (pFactPC = group_ch->pcdata->faction_standings; pFactPC != NULL; pFactPC = pFactPC->next) {
+					if (pFactPC->faction == pFactAff->faction) {
 						break;
+					}
 				}
 
 				if (!pFactPC) {
