@@ -922,9 +922,11 @@ void new_descriptor(int control)
 	#endif
 
 	size = sizeof(sock);
-	getsockname(control, (struct sockaddr *)&sock, &size);
-	if ((desc = accept(control, (struct sockaddr *)&sock, &size)) < 0) {
+	getsockname(control, (struct sockaddr *)&sock, (unsigned int * restrict)&size);
+
+	if ((desc = accept(control, (struct sockaddr *)&sock, (unsigned int * restrict)&size)) < 0) {
 		perror("New_descriptor: accept");
+
 		return;
 	}
 
@@ -933,14 +935,15 @@ void new_descriptor(int control)
 	#endif
 
 	#if defined(WIN32)
-	if (setsockopt(desc, IPPROTO_TCP, TCP_NODELAY, (char *)&OptVal,
-								 sizeof(int))) {
+	if (setsockopt(desc, IPPROTO_TCP, TCP_NODELAY, (char *)&OptVal, sizeof(int))) {
 		perror("New_descriptor: setsockopt: TCP_NODELAY");
+		
 		return;
 	}
 	#else
 	if (fcntl(desc, F_SETFL, FNDELAY) == -1) {
 		perror("New_descriptor: fcntl: FNDELAY");
+		
 		return;
 	}
 	#endif
@@ -967,7 +970,8 @@ void new_descriptor(int control)
 	dnew->outbuf = alloc_mem(dnew->outsize);
 
 	size = sizeof(sock);
-	if (getpeername(desc, (struct sockaddr *)&sock, &size) < 0) {
+
+	if (getpeername(desc, (struct sockaddr *)&sock, (unsigned int * restrict)&size) < 0) {
 		perror("New_descriptor: getpeername");
 		dnew->host = str_dup("(unknown)");
 	} else {
@@ -1038,8 +1042,9 @@ void close_socket(DESCRIPTOR_DATA *dclose)
 		DESCRIPTOR_DATA *d;
 
 		for (d = descriptor_list; d != NULL; d = d->next) {
-			if (d->snoop_by == dclose)
+			if (d->snoop_by == dclose) {
 				d->snoop_by = NULL;
+			}
 		}
 	}
 
@@ -1056,13 +1061,12 @@ void close_socket(DESCRIPTOR_DATA *dclose)
 		log_string(log_buf);
 
 		/* If ch is writing note or playing, just lose link otherwise clear char */
-		if ((dclose->connected == CON_PLAYING) ||
-				((dclose->connected >= CON_NOTE_TO) &&
-				 (dclose->connected <= CON_NOTE_FINISH))) {
+		if ((dclose->connected == CON_PLAYING) || ((dclose->connected >= CON_NOTE_TO) && (dclose->connected <= CON_NOTE_FINISH))) {
 			act("$n has lost $s link.", ch, NULL, NULL, TO_ROOM);
+			
 			ch->pcdata->ticks = 1;
-			if (IS_SET(ch->act, PLR_BUILDING));
-			{
+			
+			if (IS_SET(ch->act, PLR_BUILDING)) {
 				REMOVE_BIT(ch->act, PLR_BUILDING);
 			}
 
@@ -1072,20 +1076,22 @@ void close_socket(DESCRIPTOR_DATA *dclose)
 		}
 	}
 
-	if (d_next == dclose)
+	if (d_next == dclose) {
 		d_next = d_next->next;
+	}
 
 	if (dclose == descriptor_list) {
 		descriptor_list = descriptor_list->next;
 	} else {
 		DESCRIPTOR_DATA *d;
 
-		for (d = descriptor_list; d && d->next != dclose; d = d->next)
-			;
-		if (d != NULL)
+		for (d = descriptor_list; d && d->next != dclose; d = d->next) { }
+
+		if (d != NULL) {
 			d->next = dclose->next;
-		else
+		} else {
 			bug("Close_socket: dclose not found.", 0);
+		}
 	}
 
 	#if defined(WIN32)
@@ -1093,11 +1099,13 @@ void close_socket(DESCRIPTOR_DATA *dclose)
 	#else
 	close(dclose->descriptor);
 	#endif
+
 	free_string(&dclose->host);
 	/* RT socket leak fix -- I hope */
 	free_mem(&dclose->outbuf);
 	dclose->next = descriptor_free;
 	descriptor_free = dclose;
+
 	return;
 }
 
@@ -1107,20 +1115,23 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 	bool bOverflow = FALSE;
 
 	/* Don't read from people in shells */
-	if (d->connected == CON_SHELL)
+	if (d->connected == CON_SHELL) {
 		return TRUE;
+	}
 
 /* Hold horses if pending command already. */
-	if (d->incomm[0] != '\0')
+	if (d->incomm[0] != '\0') {
 		return TRUE;
+	}
 
 /* Check for overflow. */
 	iStart = strlen(d->inbuf);
+	
 	if (iStart >= sizeof(d->inbuf) - 10) {
 		sprintf(log_buf, "%s input overflow!", d->host);
 		log_string(log_buf);
-		write_to_descriptor(d->descriptor,
-												"\n\r*** PUT A LID ON IT!!! ***\n\r", 0, color);
+		write_to_descriptor(d->descriptor, "\n\r*** PUT A LID ON IT!!! ***\n\r", 0, color);
+
 		return FALSE;
 	}
 
@@ -1137,33 +1148,41 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 		#else
 		nRead = read(d->descriptor, d->inbuf + iStart, nBufSize);
 		#endif
+
 		if (nRead > 0) {
 			iStart += nRead;
+
 			if (bOverflow) {
 				iStart = 0;
-				if (nRead < sizeof(d->inbuf) - 10)
+
+				if (nRead < sizeof(d->inbuf) - 10) {
 					break;
-			} else if (d->inbuf[iStart - 1] == '\n'
-								|| d->inbuf[iStart - 1] == '\r' || nRead < nBufSize)
+				}
+			} else if (d->inbuf[iStart - 1] == '\n' || d->inbuf[iStart - 1] == '\r' || nRead < nBufSize) {
 					/* If we hit a CR/LF or read less than the buffer size then return */
 				break;
-			else if (iStart >= sizeof(d->inbuf) - 10) {
-				if (iStart - nRead > 0)
+			} else if (iStart >= sizeof(d->inbuf) - 10) {
+				if (iStart - nRead > 0) {
 					iStart -= nRead;
-				else
+				} else {
 					iStart = 0;
+				}
+
 				bOverflow = TRUE;
 			}
 		} else if (nRead == 0) {
 			log_string("EOF encountered on read.");
+
 			return FALSE;
 		}
+
 		#if defined(unix)
 		else if (errno == EWOULDBLOCK)
 			break;
 		#endif
 		else {
 			perror("Read_from_descriptor");
+			
 			return FALSE;
 		}
 	}
@@ -1646,16 +1665,18 @@ check_ban function.
 
 		write_to_buffer(d, echo_on_str, 0);
 
-		if (check_reconnect(d, ch->name, TRUE))
+		if (check_reconnect(d, ch->name, TRUE)) {
 			return;
+		}
 
-		if (check_playing(d, ch->name))
+		if (check_playing(d, ch->name)) {
 			return;
+		}
 
 		sprintf(log_buf, "%s@%s has connected.", ch->name, d->host);
 		log_string(log_buf);
-		if (IS_SET(ch->act, PLR_BUILDING));
-		{
+		
+		if (IS_SET(ch->act, PLR_BUILDING)) {
 			REMOVE_BIT(ch->act, PLR_BUILDING);
 		}
 
@@ -1666,6 +1687,7 @@ check_ban function.
 			do_help(ch, "motd");
 			d->connected = CON_READ_MOTD;
 		}
+		
 		break;
 
 /* RT's code for breaking link sucked... you could cheat and duplicate all your gear.
@@ -2346,8 +2368,7 @@ bool check_reconnect(DESCRIPTOR_DATA *d, char *name, bool fConn)
 	CHAR_DATA *ch;
 
 	for (ch = player_list; ch != NULL; ch = ch->next_player) {
-		if ((!fConn || ch->desc == NULL)
-				&& !str_cmp(d->character->name, ch->name)) {
+		if ((!fConn || ch->desc == NULL) && !str_cmp(d->character->name, ch->name)) {
 			if (fConn == FALSE) {
 				free_string(&d->character->pcdata->pwd);
 				d->character->pcdata->pwd = str_dup(ch->pcdata->pwd);
@@ -2356,26 +2377,32 @@ bool check_reconnect(DESCRIPTOR_DATA *d, char *name, bool fConn)
 				d->character = ch;
 				ch->desc = d;
 				ch->timer = 0;
-				if (IS_SET(ch->act, PLR_BUILDING));
-				{
+				
+				if (IS_SET(ch->act, PLR_BUILDING)) {
 					REMOVE_BIT(ch->act, PLR_BUILDING);
 				}
 
 				send_to_char("Reconnecting.\n\r", ch);
+
 				#if defined(cbuilder)
 				AddUser(ch);
 				#endif
+
 				act("$n has reconnected.", ch, NULL, NULL, TO_ROOM);
+
 				ch->pcdata->ticks = 0;
+
 				sprintf(log_buf, "%s@%s reconnected.", ch->name, d->host);
 				log_string(log_buf);
+
 				d->connected = CON_PLAYING;
+
 				/* Inform the character of a note in progress and the possbility of continuation! */
-				if (ch->pcdata->in_progress)
-					send_to_char
-					("You have a note in progress. Type NWRITE to continue it.\n\r",
-					 ch);
+				if (ch->pcdata->in_progress) {
+					send_to_char("You have a note in progress. Type NWRITE to continue it.\n\r", ch);
+				}
 			}
+
 			return TRUE;
 		}
 	}
@@ -2476,37 +2503,44 @@ void show_string(struct descriptor_data *d, char *input)
 	int show_lines;
 
 	one_argument(input, buf);
+	
 	if (buf[0] != '\0') {
-		if (d->showstr_head)
+		if (d->showstr_head) {
 			free_mem(&d->showstr_head);
+		}
+		
 		d->showstr_point = 0;
+		
 		return;
 	}
 
-	if (d->character)
+	if (d->character) {
 		show_lines = d->character->lines;
-	else
+	} else {
 		show_lines = 0;
+	}
 
 	for (scan = buffer;; scan++, d->showstr_point++) {
-		if (((*scan = *d->showstr_point) == '\n' || *scan == '\r')
-				&& (toggle = -toggle) < 0)
+		if (((*scan = *d->showstr_point) == '\n' || *scan == '\r') && (toggle = -toggle) < 0) {
 			lines++;
-
-		else if (!*scan || (show_lines > 0 && lines >= show_lines)) {
+		} else if (!*scan || (show_lines > 0 && lines >= show_lines)) {
 			*scan = '\0';
 			write_to_buffer(d, buffer, strlen(buffer));
-			for (chk = d->showstr_point; isspace(*chk); chk++);
-			{
+			
+			for (chk = d->showstr_point; isspace(*chk); chk++) {
 				if (!*chk) {
-					if (d->showstr_head)
+					if (d->showstr_head) {
 						free_mem(&d->showstr_head);
+					}
+
 					d->showstr_point = 0;
 				}
 			}
+
 			return;
 		}
 	}
+
 	return;
 }
 
