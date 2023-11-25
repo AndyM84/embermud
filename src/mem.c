@@ -41,8 +41,8 @@ HELP_DATA *help_free;
 
 extern HELP_DATA *help_last;
 
-TODO_DATA *todo_free;
-TODO_DATA *todo_last;
+extern TODO_DATA *todo_free;
+extern TODO_DATA *todo_last;
 
 RESET_DATA *new_reset_data( void )
 {

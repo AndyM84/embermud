@@ -47,17 +47,17 @@ extern int _filbuf args((FILE *));
 
 SYS_CONFIG sysconfig;
 
-HELP_DATA *help_first;
-HELP_DATA *help_last;
+extern HELP_DATA *help_first;
+extern HELP_DATA *help_last;
 
-TODO_DATA *todo_first;
-TODO_DATA *todo_last;
+extern TODO_DATA *todo_first;
+extern TODO_DATA *todo_last;
 
 SHOP_DATA *shop_first;
 SHOP_DATA *shop_last;
 
 CHAR_DATA *char_free;
-EXTRA_DESCR_DATA *extra_descr_free;
+extern EXTRA_DESCR_DATA *extra_descr_free;
 NOTE_DATA *note_free;
 OBJ_DATA *obj_free;
 PC_DATA *pcdata_free;

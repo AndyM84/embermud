@@ -31,8 +31,6 @@ DECLARE_DO_FUN(do_help);
 DECLARE_DO_FUN(do_todo);
 DECLARE_DO_FUN(do_save);
 
-char buf[MAX_STRING_LENGTH];
-
 char *const where_name[] = {
 		WORN_LIGHT,
 		WORN_FINGER,
@@ -75,27 +73,47 @@ extern bool can_use(CHAR_DATA *ch, int sn);
 
 char *format_obj_to_char(OBJ_DATA *obj, CHAR_DATA *ch, bool fShort)
 {
+	char *ret;
+	char buf[MAX_STRING_LENGTH];
 	buf[0] = '\0';
 
-	if (IS_OBJ_STAT(obj, ITEM_INVIS))
+	if (IS_OBJ_STAT(obj, ITEM_INVIS)) {
 		strcat(buf, "`K(`bI`Bnvi`bs`K)`w ");
-	if (IS_AFFECTED(ch, AFF_DETECT_EVIL) && IS_OBJ_STAT(obj, ITEM_EVIL))
-		strcat(buf, "`r(`RRe`Kd Au`Rra`r)`w ");
-	if (IS_AFFECTED(ch, AFF_DETECT_MAGIC) && IS_OBJ_STAT(obj, ITEM_MAGIC))
-		strcat(buf, "`W(`MMa`mgic`Mal`W)`w ");
-	if (IS_OBJ_STAT(obj, ITEM_GLOW))
-		strcat(buf, "`Y(G`Wl`Yo`Ww`Yi`Wn`Yg)`w ");
-	if (IS_OBJ_STAT(obj, ITEM_HUM))
-		strcat(buf, "`W(`KH`Wu`Km`Wm`Ki`Wn`Kg`W)`w ");
-	if (fShort) {
-		if (obj->short_descr != NULL)
-			strcat(buf, obj->short_descr);
-	} else {
-		if (obj->description != NULL)
-			strcat(buf, obj->description);
 	}
 
-	return buf;
+	if (IS_AFFECTED(ch, AFF_DETECT_EVIL) && IS_OBJ_STAT(obj, ITEM_EVIL)) {
+		strcat(buf, "`r(`RRe`Kd Au`Rra`r)`w ");
+	}
+
+	if (IS_AFFECTED(ch, AFF_DETECT_MAGIC) && IS_OBJ_STAT(obj, ITEM_MAGIC)) {
+		strcat(buf, "`W(`MMa`mgic`Mal`W)`w ");
+	}
+
+	if (IS_OBJ_STAT(obj, ITEM_GLOW)) {
+		strcat(buf, "`Y(G`Wl`Yo`Ww`Yi`Wn`Yg)`w ");
+	}
+
+	if (IS_OBJ_STAT(obj, ITEM_HUM)) {
+		strcat(buf, "`W(`KH`Wu`Km`Wm`Ki`Wn`Kg`W)`w ");
+	}
+
+	if (fShort) {
+		if (obj->short_descr != NULL) {
+			strcat(buf, obj->short_descr);
+		}
+	} else {
+		if (obj->description != NULL) {
+			strcat(buf, obj->description);
+		}
+	}
+
+	if (buf[0] == '\0') {
+		return "\0";
+	}
+
+	strcpy(ret, buf);
+
+	return ret;
 }
 
 /*
