@@ -3274,44 +3274,54 @@ void spell_locate_object(int sn, int level, CHAR_DATA *ch, void *vo)
 	max_found = IS_IMMORTAL(ch) ? 200 : 2 * level;
 
 	for (obj = object_list; obj != NULL; obj = obj->next) {
-		if (!can_see_obj(ch, obj) || !is_name(target_name, obj->name)
-				|| (!IS_IMMORTAL(ch) && number_percent() > 2 * level)
-				|| ch->level < obj->level)
+		if (!can_see_obj(ch, obj) || !is_name(target_name, obj->name) || (!IS_IMMORTAL(ch) && number_percent() > 2 * level) || ch->level < obj->level) {
 			continue;
+		}
 
 		found = TRUE;
 		number++;
 
-		for (in_obj = obj; in_obj->in_obj != NULL; in_obj = in_obj->in_obj)
-			;
+		for (in_obj = obj; in_obj->in_obj != NULL; in_obj = in_obj->in_obj) { }
 
-		if (in_obj->carried_by != NULL && can_see) {
-			sprintf(buf, "%s carried by %s\n\r",
-							obj->short_descr, PERS(in_obj->carried_by, ch));
+		if (in_obj->carried_by != NULL) {
+			sprintf(
+				buf,
+				"%s carried by %s\n\r",
+					obj->short_descr, PERS(in_obj->carried_by, ch)
+			);
 		} else {
-			if (IS_IMMORTAL(ch) && in_obj->in_room != NULL)
-				sprintf(buf, "%s in %s [Room %d]\n\r",
-								obj->short_descr,
-								in_obj->in_room->name, in_obj->in_room->vnum);
-			else
-				sprintf(buf, "%s in %s\n\r",
-								obj->short_descr, in_obj->in_room == NULL
-								? "somewhere" : in_obj->in_room->name);
+			if (IS_IMMORTAL(ch) && in_obj->in_room != NULL) {
+				sprintf(
+					buf,
+					"%s in %s [Room %d]\n\r",
+						obj->short_descr,
+						in_obj->in_room->name, in_obj->in_room->vnum
+				);
+			} else {
+				sprintf(
+					buf,
+					"%s in %s\n\r",
+						obj->short_descr, in_obj->in_room == NULL
+						? "somewhere" : in_obj->in_room->name
+				);
+			}
 		}
 
 		buf[0] = UPPER(buf[0]);
 		strcat(buffer, buf);
 
-		if (number >= max_found)
+		if (number >= max_found) {
 			break;
+		}
 	}
 
-	if (!found)
+	if (!found) {
 		send_to_char("Nothing like that in heaven or earth.\n\r", ch);
-	else if (ch->lines)
+	} else if (ch->lines) {
 		page_to_char(buffer, ch);
-	else
+	} else {
 		send_to_char(buffer, ch);
+	}
 
 	return;
 }
@@ -3334,16 +3344,20 @@ void spell_magic_missile(int sn, int level, CHAR_DATA *ch, void *vo)
 		level	= UMIN(level, sizeof(dam_each)/sizeof(dam_each[0]) - 1);
 		level	= UMAX(0, level);
 		dam		= number_range( dam_each[level] / 2, dam_each[level] * 2 ); */
-	if (level > 25)
+	if (level > 25) {
 		dam = dice(3, 6);
+	}
+
 /*else */
 	dam = (dice(level / 5, 3) + (level / 10));
 
-	if (saves_spell(level, victim))
+	if (saves_spell(level, victim)) {
 		dam /= 2;
-	act("A green glowing arrow fires from $n's outstretched hand.", ch, NULL,
-			NULL, TO_ROOM);
+	}
+
+	act("A green glowing arrow fires from $n's outstretched hand.", ch, NULL, NULL, TO_ROOM);
 	damage(ch, victim, NULL, dam, sn, DAM_ENERGY);
+	
 	return;
 }
 
@@ -3356,12 +3370,13 @@ void spell_mass_healing(int sn, int level, CHAR_DATA *ch, void *vo)
 	refresh_num = skill_lookup("refresh");
 
 	for (gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room) {
-		if ((IS_NPC(ch) && IS_NPC(gch)) ||
-				(!IS_NPC(ch) && !IS_NPC(gch))) {
+		if ((IS_NPC(ch) && IS_NPC(gch)) || (!IS_NPC(ch) && !IS_NPC(gch))) {
 			spell_heal(heal_num, level, ch, (void *)gch);
 			spell_refresh(refresh_num, level, ch, (void *)gch);
 		}
 	}
+
+	return;
 }
 
 void spell_mass_invis(int sn, int level, CHAR_DATA *ch, void *vo)
@@ -3370,8 +3385,10 @@ void spell_mass_invis(int sn, int level, CHAR_DATA *ch, void *vo)
 	CHAR_DATA *gch;
 
 	for (gch = ch->in_room->people; gch != NULL; gch = gch->next_in_room) {
-		if (!is_same_group(gch, ch) || IS_AFFECTED(gch, AFF_INVISIBLE))
+		if (!is_same_group(gch, ch) || IS_AFFECTED(gch, AFF_INVISIBLE)) {
 			continue;
+		}
+
 		act("$n slowly fades out of existence.", gch, NULL, NULL, TO_ROOM);
 		send_to_char("You slowly fade out of existence.\n\r", gch);
 		af.type = sn;
@@ -3382,6 +3399,7 @@ void spell_mass_invis(int sn, int level, CHAR_DATA *ch, void *vo)
 		af.bitvector = AFF_INVISIBLE;
 		affect_to_char(gch, &af);
 	}
+
 	send_to_char("Ok.\n\r", ch);
 
 	return;
@@ -3390,6 +3408,7 @@ void spell_mass_invis(int sn, int level, CHAR_DATA *ch, void *vo)
 void spell_null(int sn, int level, CHAR_DATA *ch, void *vo)
 {
 	send_to_char("That's not a spell!\n\r", ch);
+
 	return;
 }
 
@@ -3399,22 +3418,26 @@ void spell_pass_door(int sn, int level, CHAR_DATA *ch, void *vo)
 	AFFECT_DATA af;
 
 	if (IS_AFFECTED(victim, AFF_PASS_DOOR)) {
-		if (victim == ch)
+		if (victim == ch) {
 			send_to_char("You are already out of phase.\n\r", ch);
-		else
-			act("$N is already shifted out of phase.", ch, NULL, victim,
-					TO_CHAR);
+		} else {
+			act("$N is already shifted out of phase.", ch, NULL, victim, TO_CHAR);
+		}
+
 		return;
 	}
+
 	af.type = sn;
 	af.level = level;
 	af.duration = number_fuzzy(level / 4);
 	af.location = APPLY_NONE;
 	af.modifier = 0;
 	af.bitvector = AFF_PASS_DOOR;
+	
 	affect_to_char(victim, &af);
 	act("$n turns translucent.", victim, NULL, NULL, TO_ROOM);
 	send_to_char("You turn translucent.\n\r", victim);
+	
 	return;
 }
 
@@ -3425,12 +3448,13 @@ void spell_plague(int sn, int level, CHAR_DATA *ch, void *vo)
 	CHAR_DATA *victim = (CHAR_DATA *)vo;
 	AFFECT_DATA af;
 
-	if (saves_spell(level, victim) ||
-			(IS_NPC(victim) && IS_SET(victim->act, ACT_UNDEAD))) {
-		if (ch == victim)
+	if (saves_spell(level, victim) || (IS_NPC(victim) && IS_SET(victim->act, ACT_UNDEAD))) {
+		if (ch == victim) {
 			send_to_char("You feel momentarily ill, but it passes.\n\r", ch);
-		else
+		} else {
 			act("$N seems to be unaffected.", ch, NULL, victim, TO_CHAR);
+		}
+
 		return;
 	}
 
@@ -3440,13 +3464,13 @@ void spell_plague(int sn, int level, CHAR_DATA *ch, void *vo)
 	af.location = APPLY_STR;
 	af.modifier = -5;
 	af.bitvector = AFF_PLAGUE;
+
 	affect_join(victim, &af);
 
-	send_to_char
-	("You scream in agony as plague sores erupt from your skin.\n\r",
-	 victim);
-	act("$n screams in agony as plague sores erupt from $s skin.", victim,
-			NULL, NULL, TO_ROOM);
+	send_to_char("You scream in agony as plague sores erupt from your skin.\n\r", victim);
+	act("$n screams in agony as plague sores erupt from $s skin.", victim, NULL, NULL, TO_ROOM);
+
+	return;
 }
 
 void spell_poison(int sn, int level, CHAR_DATA *ch, void *vo)
@@ -3455,20 +3479,23 @@ void spell_poison(int sn, int level, CHAR_DATA *ch, void *vo)
 	AFFECT_DATA af;
 
 	if (saves_spell(level, victim)) {
-		act("$n turns slightly green, but it passes.", victim, NULL, NULL,
-				TO_ROOM);
+		act("$n turns slightly green, but it passes.", victim, NULL, NULL, TO_ROOM);
 		send_to_char("You feel momentarily ill, but it passes.\n\r", victim);
+		
 		return;
 	}
+
 	af.type = sn;
 	af.level = level;
 	af.duration = level;
 	af.location = APPLY_STR;
 	af.modifier = -2;
 	af.bitvector = AFF_POISON;
+
 	affect_join(victim, &af);
 	send_to_char("You feel very sick.\n\r", victim);
 	act("$n looks very ill.", victim, NULL, NULL, TO_ROOM);
+
 	return;
 }
 
@@ -3478,10 +3505,12 @@ void spell_protection(int sn, int level, CHAR_DATA *ch, void *vo)
 	AFFECT_DATA af;
 
 	if (IS_AFFECTED(victim, AFF_PROTECT)) {
-		if (victim == ch)
+		if (victim == ch) {
 			send_to_char("You are already protected.\n\r", ch);
-		else
+		} else {
 			act("$N is already protected.", ch, NULL, victim, TO_CHAR);
+		}
+
 		return;
 	}
 	af.type = sn;
