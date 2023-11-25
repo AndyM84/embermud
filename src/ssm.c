@@ -474,17 +474,19 @@ char *fread_string_eol(FILE *fp)
 	 * Skip blanks.
 	 * Read first char.
 	 */
-	do
+	do {
 		c = getc(fp);
-	while (c == ' ' || c == '\t');
+	} while (c == ' ' || c == '\t');
 
 	*ptr = c;
 
-	while (*ptr != '\n' && *ptr != '\r' && *ptr != EOF)
+	while (*ptr != '\n' && *ptr != '\r' && *ptr != EOF) {
 		*++ptr = getc(fp);
+	}
 
-	if (ptr == buf)
+	if (ptr == buf) {
 		return &str_empty[0];
+	}
 
 	*ptr = '\0';
 
@@ -520,17 +522,19 @@ int temp_fread_string_eol(FILE *fp, char *outbuf)
 	 * Skip blanks.
 	 * Read first char.
 	 */
-	do
+	do {
 		c = getc(fp);
-	while (c == ' ' || c == '\t');
+	} while (c == ' ' || c == '\t');
 
 	*ptr = c;
 
-	while (*ptr != '\n' && *ptr != '\r' && *ptr != EOF)
+	while (*ptr != '\n' && *ptr != '\r' && *ptr != EOF) {
 		*++ptr = getc(fp);
+	}
 
-	if (*ptr == EOF)
+	if (*ptr == EOF) {
 		bEOF = TRUE;
+	}
 
 	*ptr = '\0';
 
@@ -584,6 +588,8 @@ void temp_fread_string(FILE *fp, char *outbuf)
 			return;
 		}
 	}
+
+	return;
 }
 
 /*--- ElfHash ---------------------------------------------------
@@ -598,8 +604,11 @@ static unsigned long get_string_hash(register const char *key)
 
 	while (*key) {
 		hash = (hash << 4) + *key++;
-		if ((g = hash & 0xF0000000))
+
+		if ((g = hash & 0xF0000000)) {
 			hash ^= g >> 24;
+		}
+
 		hash &= ~g;
 	}
 
@@ -612,18 +621,20 @@ char *temp_hash_find(const char *str)
 	TempHash *ptr;
 	unsigned long ihash;
 
-	if (!fBootDb || !*str)
+	if (!fBootDb || !*str) {
 		return 0;
+	}
 
 	ihash = get_string_hash(str);
 
 	for (ptr = temp_string_hash[ihash]; ptr; ptr = ptr->next) {
-		if (*ptr->str != *str)
+		if (*ptr->str != *str) {
 			continue;
-		else if (strcmp(ptr->str, str))
+		} else if (strcmp(ptr->str, str)) {
 			continue;
-		else
+		} else {
 			return ptr->str;
+		}
 	}
 
 	return 0;
@@ -639,8 +650,9 @@ void temp_hash_add(char *str, const int len)
 	TempHash *add;
 	unsigned long ihash;
 
-	if (!fBootDb || !*str || (str <= string_space && str >= top_string))
+	if (!fBootDb || !*str || (str <= string_space && str >= top_string)) {
 		return;
+	}
 
 	ihash = get_string_hash(str);
 
@@ -649,6 +661,8 @@ void temp_hash_add(char *str, const int len)
 	temp_string_hash[ihash] = add;
 	add->len = len;
 	add->str = str;
+
+	return;
 }
 
 /* Free the temp boot string hash table */
