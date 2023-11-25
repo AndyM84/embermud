@@ -4,3 +4,4 @@
 
 /src/MSVC/.vs/embermud
 /src/MSVC/obj/x64/Debug
+src/*.o
