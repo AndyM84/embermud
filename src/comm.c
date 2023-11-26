@@ -982,9 +982,13 @@ void new_descriptor(int control)
 		int addr;
 
 		addr = ntohl(sock.sin_addr.s_addr);
-		sprintf(buf, "%d.%d.%d.%d",
-						(addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
-						(addr >> 8) & 0xFF, (addr) & 0xFF);
+		
+		sprintf(
+			buf,
+			"%d.%d.%d.%d",
+				(addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
+				(addr >> 8) & 0xFF, (addr) & 0xFF);
+
 		sprintf(log_buf, "Sock.sinaddr:  %s", buf);
 		log_string(log_buf);
 
@@ -1159,8 +1163,7 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 					break;
 				}
 			} else if (d->inbuf[iStart - 1] == '\n' || d->inbuf[iStart - 1] == '\r' || nRead < nBufSize) {
-					/* If we hit a CR/LF or read less than the buffer size then return */
-				break;
+				break; /* If we hit a CR/LF or read less than the buffer size then return */
 			} else if (iStart >= sizeof(d->inbuf) - 10) {
 				if (iStart - nRead > 0) {
 					iStart -= nRead;
@@ -1189,11 +1192,13 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 
 	d->inbuf[iStart] = '\0';
 
+	log_string(d->inbuf);
+	printf("%d\n", strlen(d->inbuf));
+
 	if (bOverflow) {
 		sprintf(log_buf, "%s input overflow!", d->host);
 		log_string(log_buf);
-		write_to_descriptor(d->descriptor,
-												"\n\rLine too long, ignored.\n\r", 0, color);
+		write_to_descriptor(d->descriptor, "\n\rLine too long, ignored.\n\r", 0, color);
 	}
 
 	return TRUE;
@@ -1251,8 +1256,10 @@ void read_from_buffer(DESCRIPTOR_DATA *d, bool color)
 	/*
 	 * Finish off the line.
 	 */
-	if (k == 0)
+	if (k == 0) {
 		d->incomm[k++] = ' ';
+	}
+
 	d->incomm[k] = '\0';
 
 	/*
@@ -1307,68 +1314,89 @@ bool process_output(DESCRIPTOR_DATA *d, bool fPrompt)
 	bool color = TRUE;
 
 	/* If you're in a shell, then no output for you! */
-	if (d->connected == CON_SHELL)
+	if (d->connected == CON_SHELL) {
 		return TRUE;
+	}
 
 /*
  * Bust a prompt.
  */
-	if ((d->character != NULL) && IS_SET(d->character->act, PLR_COLOR))
+	if ((d->character != NULL) && IS_SET(d->character->act, PLR_COLOR)) {
 		color = TRUE;
-	else
+	} else {
 		color = FALSE;
+	}
 
 	if (!merc_down) {
-		if (d->showstr_point)
+		if (d->showstr_point) {
 			write_to_buffer(d, "`W\n\r[Hit Return to continue]\n\r`0", 0);
-		else if (fPrompt && d->pString && d->connected == CON_PLAYING)
+		} else if (fPrompt && d->pString && d->connected == CON_PLAYING) {
 			write_to_buffer(d, "> ", 2);
-		else if (fPrompt && d->connected == CON_PLAYING) {
+		} else if (fPrompt && d->connected == CON_PLAYING) {
 			CHAR_DATA *ch;
 
 			ch = d->original ? d->original : d->character;
-			if (!IS_SET(ch->comm, COMM_COMPACT))
+		
+			if (!IS_SET(ch->comm, COMM_COMPACT)) {
 				write_to_buffer(d, "\n\r", 2);
+			}
 
 			if (IS_SET(ch->comm, COMM_PROMPT)) {
 				ch = d->character;
-				if (!IS_NPC(ch))
+				
+				if (!IS_NPC(ch)) {
 					sprintf(buf, "%s", doparseprompt(ch));
-				else
-					sprintf(buf, "<H%d/%d M%d/%d V%d/%d>", ch->hit,
-									ch->max_hit, ch->mana, ch->max_mana, ch->move,
-									ch->max_move);
+				} else {
+					sprintf(
+						buf,
+						"<H%d/%d M%d/%d V%d/%d>",
+							ch->hit,
+							ch->max_hit,
+							ch->mana,
+							ch->max_mana,
+							ch->move,
+							ch->max_move
+					);
+				}
+
 				write_to_buffer(d, buf, 0);
 			}
 
-			if (IS_SET(ch->comm, COMM_TELNET_GA))
+			if (IS_SET(ch->comm, COMM_TELNET_GA)) {
 				write_to_buffer(d, go_ahead_str, 0);
+			}
 		}
 	}
 
 	/*
 	 * Short-circuit if nothing to write.
 	 */
-	if (d->outtop == 0)
+	if (d->outtop == 0) {
 		return TRUE;
+	}
 
 /*
  * Snoop-o-rama.
  */
 	if (d->snoop_by != NULL) {
-		if (d->character != NULL)
+		if (d->character != NULL) {
 			write_to_buffer(d->snoop_by, d->character->name, 0);
+		}
+
 		write_to_buffer(d->snoop_by, "> ", 2);
 		write_to_buffer(d->snoop_by, d->outbuf, d->outtop);
 	}
+
 	/*
 	 * OS-dependent output.
 	 */
 	if (!write_to_descriptor(d->descriptor, d->outbuf, d->outtop, color)) {
 		d->outtop = 0;
+
 		return FALSE;
 	} else {
 		d->outtop = 0;
+
 		return TRUE;
 	}
 }
@@ -1381,14 +1409,16 @@ void write_to_buffer(DESCRIPTOR_DATA *d, const char *txt, int length)
 	extern bool silentmode;
 
 	/* Don't do ANYTHING if global silentmode is on. */
-	if (silentmode)
+	if (silentmode) {
 		return;
+	}
 
 /*
  * Find length in case caller didn't.
  */
-	if (length <= 0)
+	if (length <= 0) {
 		length = strlen(txt);
+	}
 
 /*
  * Initial \n\r if needed.
@@ -1405,8 +1435,9 @@ void write_to_buffer(DESCRIPTOR_DATA *d, const char *txt, int length)
 	while (d->outtop + length >= d->outsize) {
 		char *outbuf;
 
-		if (d->outsize + 2048 > MAX_OUTPUT_BUFFER)
+		if (d->outsize + 2048 > MAX_OUTPUT_BUFFER) {
 			return;
+		}
 
 		outbuf = alloc_mem(d->outsize + 2048);
 		strncpy(outbuf, d->outbuf, d->outtop);
@@ -1421,6 +1452,7 @@ void write_to_buffer(DESCRIPTOR_DATA *d, const char *txt, int length)
 
 	strcpy(d->outbuf + d->outtop, txt);
 	d->outtop += length;
+
 	return;
 }
 
@@ -1443,14 +1475,17 @@ bool write_to_descriptor(int desc, char *txt, int length, bool color)
 
 	for (iStart = 0; iStart < length; iStart += nWrite) {
 		nBlock = UMIN(length - iStart, sizeof(colorbuf));
+
 		#if defined(WIN32)
 		if ((nWrite = send(desc, colorbuf + iStart, nBlock, 0)) < 0) {
 			perror("Write_to_descriptor");
+
 			return FALSE;
 		}
 		#else
 		if ((nWrite = write(desc, colorbuf + iStart, nBlock)) < 0) {
 			perror("Write_to_descriptor");
+
 			return FALSE;
 		}
 		#endif
@@ -1477,30 +1512,35 @@ void nanny(DESCRIPTOR_DATA *d, char *argument)
 
 	/* Delete leading spaces UNLESS character is writing a note */
 	if (d->connected != CON_NOTE_TEXT) {
-		while (isspace(*argument))
+		while (isspace(*argument)) {
 			argument++;
+		}
 	}
 
 	ch = d->character;
 	update_last("Nanny:", ch ? ch->name : "new", argument);
 
 	switch (d->connected) {
-
 	default:
 		bug("Nanny: bad d->connected %d.", d->connected);
+
 		#if defined(cbuilder)
-		if (d->character && d->character->TNode)
+		if (d->character && d->character->TNode) {
 			RemoveUser(d->character);
+		}
 		#endif
+
 		close_socket(d);
+
 		return;
 
 	case CON_GET_ANSI:
 
-		if ((argument[0] == 'n') || (argument[0] == 'N'))
+		if ((argument[0] == 'n') || (argument[0] == 'N')) {
 			d->ansi = FALSE;
-		else
+		} else {
 			d->ansi = TRUE;
+		}
 
 	/*
 	 * Send the greeting.
@@ -1509,27 +1549,33 @@ void nanny(DESCRIPTOR_DATA *d, char *argument)
 			extern char *help_greeting;
 			extern char *ansi_greeting;
 
-			if (d->ansi)
+			if (d->ansi) {
 				write_to_buffer(d, ansi_greeting, 0);
-			else {
-				if (help_greeting[0] == '.')
+			} else {
+				if (help_greeting[0] == '.') {
 					write_to_buffer(d, help_greeting + 1, 0);
-				else
+				} else {
 					write_to_buffer(d, help_greeting, 0);
+				}
 			}
 		}
+
 		d->connected = CON_GET_NAME;
+
 		return;
 
 	case CON_GET_NAME:
 		if (argument[0] == '\0') {
 			close_socket(d);
+
 			return;
 		}
 
 		argument[0] = UPPER(argument[0]);
+
 		if (!check_parse_name(argument)) {
 			write_to_buffer(d, "Illegal name, try another.\n\rName: ", 0);
+
 			return;
 		}
 
@@ -1545,37 +1591,40 @@ check_ban function.
 
 		for (pban = ban_list; pban != NULL; pban = pban->next) {
 			ban_type = pban->ban_flags;
+
 			if (!str_suffix((pban->name), d->host)) {
-				if (IS_SET(pban->ban_flags, BAN_PERMANENT)
-						|| IS_SET(pban->ban_flags, BAN_ALL)) {
-					write_to_buffer(d,
-													"Your site has been banned from this mud.\n\r",
-													0);
+				if (IS_SET(pban->ban_flags, BAN_PERMANENT) || IS_SET(pban->ban_flags, BAN_ALL)) {
+					write_to_buffer(d, "Your site has been banned from this mud.\n\r", 0);
+
 					close_socket(d);
+
 					return;
 				}
 			}
-
 		}
+
 		for (pban = ban_list; pban != NULL; pban = pban->next) {
 			ban_type = pban->ban_flags;
+
 			if (!str_suffix((pban->name), d->host)) {
 				if (ban_type == 16 && !IS_SET(ch->act, PLR_PERMIT)) {
-					sprintf(buf,
-									"You do not have permission to play on this mud.\n\r Please email %s to get permission to play here.",
-									MUD_ADMIN_EMAIL);
+					sprintf(buf, "You do not have permission to play on this mud.\n\r Please email %s to get permission to play here.", MUD_ADMIN_EMAIL);
 					send_to_char(buf, ch);
+
 					close_socket(d);
+
 					return;
 				}
 			}
-
 		}
+
 		if (IS_SET(ch->act, PLR_DENY)) {
 			sprintf(log_buf, "Denying access to %s@%s.", argument, d->host);
 			log_string(log_buf);
 			write_to_buffer(d, "You are denied access.\n\r", 0);
+
 			close_socket(d);
+
 			return;
 		}
 
@@ -1584,11 +1633,15 @@ check_ban function.
 		} else {
 			if (wizlock && !IS_HERO(ch)) {
 				write_to_buffer(d, "The game is wizlocked.\n\r", 0);
+
 				close_socket(d);
+
 				return;
 			} else if (chaos && !IS_HERO(ch)) {
 				write_to_buffer(d, "The game is in CHAOS!\n\r", 0);
+
 				close_socket(d);
+
 				return;
 			}
 		}
@@ -1597,26 +1650,30 @@ check_ban function.
 			write_to_buffer(d, "Password: ", 0);
 			write_to_buffer(d, echo_off_str, 0);
 			d->connected = CON_GET_OLD_PASSWORD;
+
 			return;
 		} else {
 				/* New player */
 			if (newlock) {
 				write_to_buffer(d, "The game is newlocked.\n\r", 0);
+
 				close_socket(d);
+
 				return;
 			}
+
 			for (pban = ban_list; pban != NULL; pban = pban->next) {
 				ban_type = pban->ban_flags;
+
 				if (!str_suffix((pban->name), d->host)) {
 					if (ban_type == 4) {
-						write_to_buffer(d,
-														"New players from your site have been banned from this mud.\n\r",
-														0);
+						write_to_buffer(d, "New players from your site have been banned from this mud.\n\r", 0);
+
 						close_socket(d);
+
 						return;
 					}
 				}
-
 			}
 /*
 		for ( pban = ban_list; pban != NULL; pban = pban->next )
@@ -1635,14 +1692,18 @@ check_ban function.
 
 
 }*/
+
 			sprintf(buf, "Did I get that right, %s (Y/N)? ", argument);
 			write_to_buffer(d, buf, 0);
+
 			d->connected = CON_CONFIRM_NEW_NAME;
+
 			return;
 		}
 
-		if (check_playing(d, ch->name))
+		if (check_playing(d, ch->name)) {
 			return;
+		}
 
 		break;
 
@@ -1651,16 +1712,16 @@ check_ban function.
 
 		if (strcmp(crypt(argument, ch->pcdata->pwd), ch->pcdata->pwd)) {
 			write_to_buffer(d, "Wrong password.\n\r", 0);
+
 			close_socket(d);
+
 			return;
 		}
 
 		if (ch->pcdata->pwd[0] == 0) {
 			write_to_buffer(d, "Warning! Null password!\n\r", 0);
 			write_to_buffer(d, "Please report old password with bug.\n\r", 0);
-			write_to_buffer(d,
-											"Type 'password null <new password>' to fix.\n\r",
-											0);
+			write_to_buffer(d, "Type 'password null <new password>' to fix.\n\r", 0);
 		}
 
 		write_to_buffer(d, echo_on_str, 0);
@@ -1702,125 +1763,149 @@ check_ban function.
 		case 'Y':
 			for (d_old = descriptor_list; d_old != NULL; d_old = d_next) {
 				d_next = d_old->next;
-				if (d_old == d || d_old->character == NULL)
-					continue;
 
-				if (str_cmp(ch->name, d_old->character->name))
+				if (d_old == d || d_old->character == NULL) {
 					continue;
+				}
+
+				if (str_cmp(ch->name, d_old->character->name)) {
+					continue;
+				}
 
 				close_socket(d_old);
+
 				if (d->character != NULL) {
 					free_char(d->character);
 					d->character = NULL;
 				}
+
 				d->connected = CON_GET_NAME;
+
 				break;
 			}
 
 			write_to_buffer(d, "Disconnected.   Re-enter name: ", 0);
+
 			if (d->character != NULL) {
 				free_char(d->character);
 				d->character = NULL;
 			}
+
 			d->connected = CON_GET_NAME;
+
 			break;
 
 		case 'n':
 		case 'N':
 			write_to_buffer(d, "Name: ", 0);
+
 			if (d->character != NULL) {
 				free_char(d->character);
 				d->character = NULL;
 			}
+
 			d->connected = CON_GET_NAME;
+
 			break;
 
 		default:
 			write_to_buffer(d, "Please type Y or N? ", 0);
+
 			break;
 		}
+
 		break;
 
 	case CON_CONFIRM_NEW_NAME:
 		switch (*argument) {
 		case 'y':
 		case 'Y':
-			sprintf(buf, "New character.\n\rGive me a password for %s: %s",
-							ch->name, echo_off_str);
+			sprintf(buf, "New character.\n\rGive me a password for %s: %s", ch->name, echo_off_str);
 			write_to_buffer(d, buf, 0);
 			d->connected = CON_GET_NEW_PASSWORD;
-			if (d->ansi)
+
+			if (d->ansi) {
 				SET_BIT(ch->act, PLR_COLOR);
+			}
+
+
 			break;
 
 		case 'n':
 		case 'N':
 			write_to_buffer(d, "Ok, what IS it, then? ", 0);
 			free_char(d->character);
+
 			d->character = NULL;
 			d->connected = CON_GET_NAME;
+
 			break;
 
 		default:
 			write_to_buffer(d, "Please type Yes or No? ", 0);
+
 			break;
 		}
+
 		break;
 
 	case CON_GET_NEW_PASSWORD:
 		write_to_buffer(d, "\n\r", 2);
 
 		if (strlen(argument) < 5) {
-			write_to_buffer(d,
-											"Password must be at least five characters long.\n\rPassword: ",
-											0);
+			write_to_buffer(d, "Password must be at least five characters long.\n\rPassword: ", 0);
+
 			return;
 		}
 
 		pwdnew = crypt(argument, ch->name);
+
 		for (p = pwdnew; *p != '\0'; p++) {
 			if (*p == '~') {
-				write_to_buffer(d,
-												"New password not acceptable, try again.\n\rPassword: ",
-												0);
+				write_to_buffer(d, "New password not acceptable, try again.\n\rPassword: ", 0);
+
 				return;
 			}
 		}
 
 		free_string(&ch->pcdata->pwd);
+
 		ch->pcdata->pwd = str_dup(pwdnew);
+
 		write_to_buffer(d, "Please retype password: ", 0);
+
 		d->connected = CON_CONFIRM_NEW_PASSWORD;
+
 		break;
 
 	case CON_CONFIRM_NEW_PASSWORD:
 		write_to_buffer(d, "\n\r", 2);
 
 		if (strcmp(crypt(argument, ch->pcdata->pwd), ch->pcdata->pwd)) {
-			write_to_buffer(d, "Passwords don't match.\n\rRetype password: ",
-											0);
+			write_to_buffer(d, "Passwords don't match.\n\rRetype password: ", 0);
 			d->connected = CON_GET_NEW_PASSWORD;
+
 			return;
 		}
 
 		write_to_buffer(d, echo_on_str, 0);
 		write_to_buffer(d, "The following races are available:\n\r  ", 0);
-		for (race = 1; race_table[race].name != NULL; race++) {
-			if (!race_table[race].pc_race)
-				break;
-			if (!race_table[race].remort_race ||
-					(race_table[race].remort_race
-					 && IS_SET(ch->act, PLR_REMORT))) {
 
+		for (race = 1; race_table[race].name != NULL; race++) {
+			if (!race_table[race].pc_race) {
+				break;
+			}
+
+			if (!race_table[race].remort_race || (race_table[race].remort_race && IS_SET(ch->act, PLR_REMORT))) {
 				write_to_buffer(d, race_table[race].name, 0);
 				write_to_buffer(d, " ", 1);
 			}
-
 		}
+
 		write_to_buffer(d, "\n\r", 0);
-		write_to_buffer(d, "What is your race (help for more information)? ",
-										0);
+		write_to_buffer(d, "What is your race (help for more information)? ", 0);
 		d->connected = CON_GET_NEW_RACE;
+
 		break;
 
 	case CON_GET_NEW_RACE:
@@ -1828,44 +1913,48 @@ check_ban function.
 
 		if (!strcmp(arg, "help")) {
 			argument = one_argument(argument, arg);
-			if (argument[0] == '\0')
+
+			if (argument[0] == '\0') {
 				do_help(ch, "race help");
-			else
+			} else {
 				do_help(ch, argument);
-			write_to_buffer(d,
-											"What is your race (help for more information)? ",
-											0);
+			}
+
+			write_to_buffer(d, "What is your race (help for more information)? ", 0);
+
 			break;
 		}
 
 		race = race_lookup(argument);
 
-		if (race == 0 || !race_table[race].pc_race
-				|| (race_table[race].remort_race
-						&& !IS_SET(ch->act, PLR_REMORT))) {
+		if (race == 0 || !race_table[race].pc_race || (race_table[race].remort_race && !IS_SET(ch->act, PLR_REMORT))) {
 			write_to_buffer(d, "That is not a valid race.\n\r", 0);
 			write_to_buffer(d, "The following races are available:\n\r  ", 0);
+
 			for (race = 1; race_table[race].name != NULL; race++) {
-				if (!race_table[race].pc_race)
+				if (!race_table[race].pc_race) {
 					break;
-				if (!race_table[race].remort_race ||
-						(race_table[race].remort_race
-						 && IS_SET(ch->act, PLR_REMORT))) {
+				}
+
+				if (!race_table[race].remort_race || (race_table[race].remort_race && IS_SET(ch->act, PLR_REMORT))) {
 					write_to_buffer(d, race_table[race].name, 0);
 					write_to_buffer(d, " ", 1);
 				}
 			}
+
 			write_to_buffer(d, "\n\r", 0);
-			write_to_buffer(d,
-											"What is your race? (help for more information) ",
-											0);
+			write_to_buffer(d, "What is your race? (help for more information) ", 0);
+
 			break;
 		}
 
 		ch->race = race;
+
 		/* initialize stats */
-		for (i = 0; i < MAX_STATS; i++)
+		for (i = 0; i < MAX_STATS; i++) {
 			ch->perm_stat[i] = pc_race_table[race].stats[i];
+		}
+
 		ch->affected_by = ch->affected_by | race_table[race].aff;
 		ch->imm_flags = ch->imm_flags | race_table[race].imm;
 		ch->res_flags = ch->res_flags | race_table[race].res;
@@ -1875,15 +1964,21 @@ check_ban function.
 
 		/* add skills */
 		for (i = 0; i < 5; i++) {
-			if (pc_race_table[race].skills[i] == NULL)
+			if (pc_race_table[race].skills[i] == NULL) {
 				break;
+			}
+
 			group_add(ch, pc_race_table[race].skills[i], FALSE);
 		}
+
 		/* add cost */
 		ch->pcdata->points = pc_race_table[race].points;
 		ch->size = pc_race_table[race].size;
+
 		write_to_buffer(d, "What is your sex (M/F)? ", 0);
+
 		d->connected = CON_GET_NEW_SEX;
+
 		break;
 
 	case CON_GET_NEW_SEX:
@@ -1892,23 +1987,30 @@ check_ban function.
 		case 'M':
 			ch->sex = SEX_MALE;
 			ch->pcdata->true_sex = SEX_MALE;
+
 			break;
+
 		case 'f':
 		case 'F':
 			ch->sex = SEX_FEMALE;
 			ch->pcdata->true_sex = SEX_FEMALE;
+
 			break;
+
 		default:
 			write_to_buffer(d, "That's not a sex.\n\rWhat IS your sex? ", 0);
+
 			return;
 		}
+
 		write_to_buffer(d, "Press enter to start rolling your stats. ", 0);
+
 		d->connected = CON_GET_STATS;
+
 		break;
 
 	case CON_GET_STATS:
-		if ((rolled == TRUE) && atoi(argument) < 5
-				&& atoi(argument) >= 0)
+		if ((rolled == TRUE) && atoi(argument) < 5 && atoi(argument) >= 0)
 			switch (argument[0]) {
 			case '0':
 			case '1':
@@ -1922,134 +2024,128 @@ check_ban function.
 				ch->perm_stat[4] = stat5[atoi(argument)];
 
 				strcpy(buf, "Select a class [");
+
 				for (iClass = 0; iClass < MAX_CLASS; iClass++) {
-					if (!class_table[iClass].remort_class ||
-							(class_table[iClass].remort_class
-							 && IS_SET(ch->act, PLR_REMORT))) {
-						if (iClass > 0
-								&& str_cmp(class_table[iClass].name, "Console"))
+					if (!class_table[iClass].remort_class || (class_table[iClass].remort_class && IS_SET(ch->act, PLR_REMORT))) {
+						if (iClass > 0 && str_cmp(class_table[iClass].name, "Console")) {
 							strcat(buf, " ");
-						if (str_cmp(class_table[iClass].name, "Console"))
+						}
+						
+						if (str_cmp(class_table[iClass].name, "Console")) {
 							strcat(buf, class_table[iClass].name);
+						}
 					}
 				}
+				
 				strcat(buf, "]: ");
 				write_to_buffer(d, buf, 0);
+				
 				d->connected = CON_GET_NEW_CLASS;
+
 				break;
+
 			default:
-				write_to_buffer(d,
-												"                       0    1    2    3    4\n\r",
-												0);
+				write_to_buffer(d, "                       0    1    2    3    4\n\r", 0);
 				write_to_buffer(d, "     Strength     :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat1[x] =
-						roll_stat(pc_race_table[ch->race].stats[0],
-											pc_race_table[ch->race].max_stats[0] -
-											REROLL_PENALTY);
+					stat1[x] = roll_stat(pc_race_table[ch->race].stats[0], pc_race_table[ch->race].max_stats[0] - REROLL_PENALTY);
 					sprintf(buf, "   %2d", stat1[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Intelligence :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat2[x] =
-						roll_stat(pc_race_table[ch->race].stats[1],
-											pc_race_table[ch->race].max_stats[1] -
-											REROLL_PENALTY);
+					stat2[x] = roll_stat(pc_race_table[ch->race].stats[1], pc_race_table[ch->race].max_stats[1] - REROLL_PENALTY);
 					sprintf(buf, "   %2d", stat2[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Wisdom       :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat3[x] =
-						roll_stat(pc_race_table[ch->race].stats[2],
-											pc_race_table[ch->race].max_stats[2] -
-											REROLL_PENALTY);
+					stat3[x] = roll_stat(pc_race_table[ch->race].stats[2], pc_race_table[ch->race].max_stats[2] - REROLL_PENALTY);
 					sprintf(buf, "   %2d", stat3[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Dexterity    :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat4[x] =
-						roll_stat(pc_race_table[ch->race].stats[3],
-											pc_race_table[ch->race].max_stats[3] -
-											REROLL_PENALTY);
+					stat4[x] = roll_stat(pc_race_table[ch->race].stats[3], pc_race_table[ch->race].max_stats[3] - REROLL_PENALTY);
 					sprintf(buf, "   %2d", stat4[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Constitution :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat5[x] =
-						roll_stat(pc_race_table[ch->race].stats[4],
-											pc_race_table[ch->race].max_stats[4] -
-											REROLL_PENALTY);
+					stat5[x] = roll_stat(pc_race_table[ch->race].stats[4], pc_race_table[ch->race].max_stats[4] - REROLL_PENALTY);
 					sprintf(buf, "   %2d", stat5[x]);
 					write_to_buffer(d, buf, 0);
 				}
-				write_to_buffer(d,
-												"\n\r\n\r     Press enter to roll again, else enter number of column: ",
-												0);
+
+				write_to_buffer(d, "\n\r\n\r     Press enter to roll again, else enter number of column: ", 0);
+				
 				rolled = TRUE;
+				
 				break;
 			} else {
-				write_to_buffer(d,
-												"                       0    1    2    3    4\n\r",
-												0);
+				write_to_buffer(d, "                       0    1    2    3    4\n\r", 0);
 				write_to_buffer(d, "     Strength     :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat1[x] =
-						roll_stat(pc_race_table[ch->race].stats[0],
-											pc_race_table[ch->race].max_stats[0]);
+					stat1[x] = roll_stat(pc_race_table[ch->race].stats[0], pc_race_table[ch->race].max_stats[0]);
 					sprintf(buf, "   %2d", stat1[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Intelligence :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat2[x] =
-						roll_stat(pc_race_table[ch->race].stats[1],
-											pc_race_table[ch->race].max_stats[1]);
+					stat2[x] = roll_stat(pc_race_table[ch->race].stats[1], pc_race_table[ch->race].max_stats[1]);
 					sprintf(buf, "   %2d", stat2[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Wisdom       :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat3[x] =
-						roll_stat(pc_race_table[ch->race].stats[2],
-											pc_race_table[ch->race].max_stats[2]);
+					stat3[x] = roll_stat(pc_race_table[ch->race].stats[2], pc_race_table[ch->race].max_stats[2]);
 					sprintf(buf, "   %2d", stat3[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Dexterity    :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat4[x] =
-						roll_stat(pc_race_table[ch->race].stats[3],
-											pc_race_table[ch->race].max_stats[3]);
+					stat4[x] = roll_stat(pc_race_table[ch->race].stats[3], pc_race_table[ch->race].max_stats[3]);
 					sprintf(buf, "   %2d", stat4[x]);
 					write_to_buffer(d, buf, 0);
 				}
+
 				write_to_buffer(d, "\n\r     Constitution :", 0);
+
 				for (x = 0; x < 5; x++) {
-					stat5[x] =
-						roll_stat(pc_race_table[ch->race].stats[4],
-											pc_race_table[ch->race].max_stats[4]);
+					stat5[x] = roll_stat(pc_race_table[ch->race].stats[4], pc_race_table[ch->race].max_stats[4]);
 					sprintf(buf, "   %2d", stat5[x]);
 					write_to_buffer(d, buf, 0);
 				}
-				write_to_buffer(d,
-												"\n\r\n\r     Press enter to roll again, else enter number of column: ",
-												0);
+
+				write_to_buffer(d, "\n\r\n\r     Press enter to roll again, else enter number of column: ", 0);
+				
 				rolled = TRUE;
 			}
-		break;
+
+			break;
 
 	case CON_GET_NEW_CLASS:
 		iClass = class_lookup(argument);
 
-		if (iClass == -1 || !str_cmp(argument, "console")
-				|| (class_table[iClass].remort_class
-						&& !IS_SET(ch->act, PLR_REMORT))) {
-			write_to_buffer(d,
-											"That's not a class.\n\rWhat IS your class? ", 0);
+		if (iClass == -1 || !str_cmp(argument, "console") || (class_table[iClass].remort_class && !IS_SET(ch->act, PLR_REMORT))) {
+			write_to_buffer(d, "That's not a class.\n\rWhat IS your class? ", 0);
+
 			return;
 		}
 
@@ -2058,12 +2154,16 @@ check_ban function.
 		sprintf(log_buf, "%s@%s new player.", ch->name, d->host);
 		log_string(log_buf);
 		write_to_buffer(d, "\n\r", 2);
+
 		/*if (ch->race == 1) write_to_buffer( d, "Your class is evil by nature.\n\r",0);
 			 else { */
+
 		write_to_buffer(d, "You may be good, neutral, or evil.\n\r", 0);
 		write_to_buffer(d, "Which alignment (G/N/E)? ", 0);
+
 		/*} */
 		d->connected = CON_GET_ALIGNMENT;
+
 		break;
 
 	case CON_GET_ALIGNMENT:
@@ -2072,18 +2172,25 @@ check_ban function.
 		case 'g':
 		case 'G':
 			ch->alignment = 750;
+
 			break;
+
 		case 'n':
 		case 'N':
 			ch->alignment = 0;
+
 			break;
+
 		case 'e':
 		case 'E':
 			ch->alignment = -750;
+
 			break;
+
 		default:
 			write_to_buffer(d, "That's not a valid alignment.\n\r", 0);
 			write_to_buffer(d, "Which alignment (G/N/E)? ", 0);
+
 			return;
 		}
 
@@ -2091,81 +2198,100 @@ check_ban function.
 
 		group_add(ch, "rom basics", FALSE);
 		group_add(ch, class_table[ch->Class].base_group, FALSE);
+
 		ch->pcdata->learned[gsn_recall] = 50;
+
 		write_to_buffer(d, "Do you wish to customize this character?\n\r", 0);
-		write_to_buffer(d,
-										"Customization takes time, but allows a wider range of skills and abilities.\n\r",
-										0);
+		write_to_buffer(d, "Customization takes time, but allows a wider range of skills and abilities.\n\r", 0);
 		write_to_buffer(d, "Customize (Y/N)? ", 0);
+
 		d->connected = CON_DEFAULT_CHOICE;
+
 		break;
 
 	case CON_DEFAULT_CHOICE:
 		write_to_buffer(d, "\n\r", 2);
+
 		switch (argument[0]) {
 		case 'y':
 		case 'Y':
 			ch->gen_data = alloc_perm(sizeof(*ch->gen_data));
 			ch->gen_data->points_chosen = ch->pcdata->points;
+
 			do_help(ch, "group header");
 			list_group_costs(ch);
-			write_to_buffer(d, "You already have the following skills:\n\r",
-											0);
+			write_to_buffer(d, "You already have the following skills:\n\r", 0);
 			do_skills(ch, "");
 			do_help(ch, "menu choice");
+			
 			d->connected = CON_GEN_GROUPS;
+			
 			break;
+
 		case 'n':
 		case 'N':
 			group_add(ch, class_table[ch->Class].default_group, TRUE);
 			write_to_buffer(d, "\n\r", 2);
 			do_help(ch, "motd");
+
 			d->connected = CON_READ_MOTD;
+
 			break;
+
 		default:
 			write_to_buffer(d, "Please answer (Y/N)? ", 0);
+
 			return;
 		}
 		break;
 
 	case CON_GEN_GROUPS:
 		send_to_char("\n\r", ch);
+
 		if (!str_cmp(argument, "done")) {
 			sprintf(buf, "Creation points: %d\n\r", ch->pcdata->points);
 			send_to_char(buf, ch);
-			sprintf(buf,
-							"Experience modifier: %d (Percent of difference from the norm)\n\r",
-							figure_difference(ch->gen_data->points_chosen));
-			if (ch->pcdata->points < 40)
+			sprintf(buf, "Experience modifier: %d (Percent of difference from the norm)\n\r", figure_difference(ch->gen_data->points_chosen));
+
+			if (ch->pcdata->points < 40) {
 				ch->train = (40 - ch->pcdata->points + 1) / 2;
+			}
+
 			send_to_char(buf, ch);
 			write_to_buffer(d, "\n\r", 2);
 			do_help(ch, "motd");
+
 			d->connected = CON_READ_MOTD;
+
 			break;
 		}
 
-		if (!parse_gen_groups(ch, argument))
-			send_to_char
-			("Choices are: list,learned,premise,add,drop,info,help, and done.\n\r",
-			 ch);
+		if (!parse_gen_groups(ch, argument)) {
+			send_to_char("Choices are: list,learned,premise,add,drop,info,help, and done.\n\r", ch);
+		}
 
 		do_help(ch, "menu choice");
+
 		break;
 
 	case CON_BEGIN_REMORT:
 		write_to_buffer(d, "Now beginning the remorting process.\n\r\n\r", 0);
 		write_to_buffer(d, "The following races are available:\n\r  ", 0);
+
 		for (race = 1; race_table[race].name != NULL; race++) {
-			if (!race_table[race].pc_race)
+			if (!race_table[race].pc_race) {
 				break;
+			}
+
 			write_to_buffer(d, race_table[race].name, 0);
 			write_to_buffer(d, " ", 1);
 		}
+
 		write_to_buffer(d, "\n\r", 0);
-		write_to_buffer(d, "What is your race (help for more information)? ",
-										0);
+		write_to_buffer(d, "What is your race (help for more information)? ", 0);
+
 		d->connected = CON_GET_NEW_RACE;
+
 		break;
 
 	case CON_READ_IMOTD:
@@ -2183,7 +2309,9 @@ check_ban function.
 		#endif
 		write_to_buffer(d, "\n\r", 2);
 		do_help(ch, "motd");
+
 		d->connected = CON_READ_MOTD;
+
 		break;
 
 	case CON_READ_MOTD:
@@ -2192,6 +2320,7 @@ check_ban function.
 		#endif
 
 		write_to_buffer(d, "\n\rWelcome to EmberMUD.\n\r", 0);
+
 		/* Add to list of PCs and NPCs */
 		ch->next = char_list;
 		char_list = ch;
@@ -2200,10 +2329,10 @@ check_ban function.
 		player_list = ch;
 
 		d->connected = CON_PLAYING;
+
 		reset_char(ch);
 
 		if (ch->level == 0) {
-
 			ch->level = 1;
 			ch->exp = 0;
 			ch->hit = ch->max_hit;
@@ -2211,11 +2340,10 @@ check_ban function.
 			ch->move = ch->max_move;
 			ch->train = STARTING_TRAINS;
 			ch->practice = STARTING_PRACTICES;
+			
 			set_title(ch, STARTING_TITLE);
-
 			do_outfit(ch, "");
-			obj_to_char(create_object(get_obj_index(OBJ_VNUM_MAP), 0),
-									ch);
+			obj_to_char(create_object(get_obj_index(OBJ_VNUM_MAP), 0), ch);
 
 			ch->pcdata->learned[get_weapon_sn(ch)] = 40;
 
@@ -2233,19 +2361,22 @@ check_ban function.
 		}
 
 		#ifdef ANNOUNCE_CONNECTIONS
+
 		if (ch->played == 0) {
-			sprintf(buf, "%s has entered the game for the first time.",
-							ch->name);
+			sprintf(buf, "%s has entered the game for the first time.", ch->name);
 			do_sendinfo(ch, buf);
 		}
+
 		sprintf(buf, "%s has entered the game.", ch->name);
+
 		#ifdef IMMS_CAN_HIDE
 		if (IS_SET(ch->act, PLR_NO_ANNOUNCE)) {
 			REMOVE_BIT(ch->act, PLR_NO_ANNOUNCE);
 		} else {
 			#endif
-			if (!IS_SET(ch->act, PLR_WIZINVIS))
+			if (!IS_SET(ch->act, PLR_WIZINVIS)) {
 				do_sendinfo(ch, buf);
+			}
 			#ifdef IMMS_CAN_HIDE
 		}
 		#endif
@@ -2260,8 +2391,9 @@ check_ban function.
 			act("$n has entered the game.", ch->pet, NULL, NULL, TO_ROOM);
 		}
 
-		if (IS_SET(ch->act, PLR_AFK))
+		if (IS_SET(ch->act, PLR_AFK)) {
 			do_afk(ch, NULL);
+		}
 
 		ch->pcdata->chaos_score = 0;
 
@@ -2269,22 +2401,27 @@ check_ban function.
 
 	case CON_NOTE_TO:
 		handle_con_note_to(d, argument);
+
 		break;
 
 	case CON_NOTE_SUBJECT:
 		handle_con_note_subject(d, argument);
+
 		break;                  /* subject */
 
 	case CON_NOTE_EXPIRE:
 		handle_con_note_expire(d, argument);
+
 		break;
 
 	case CON_NOTE_TEXT:
 		handle_con_note_text(d, argument);
+
 		break;
 
 	case CON_NOTE_FINISH:
 		handle_con_note_finish(d, argument);
+
 		break;
 
 	case CON_SHELL:
@@ -2525,6 +2662,7 @@ void show_string(struct descriptor_data *d, char *input)
 			lines++;
 		} else if (!*scan || (show_lines > 0 && lines >= show_lines)) {
 			*scan = '\0';
+
 			write_to_buffer(d, buffer, strlen(buffer));
 			
 			for (chk = d->showstr_point; isspace(*chk); chk++) {
@@ -2547,20 +2685,24 @@ void show_string(struct descriptor_data *d, char *input)
 /* quick sex fixer */
 void fix_sex(CHAR_DATA *ch)
 {
-	if (ch->sex < 0 || ch->sex > 2)
+	if (ch->sex < 0 || ch->sex > 2) {
 		ch->sex = IS_NPC(ch) ? 0 : ch->pcdata->true_sex;
+	}
+
+	return;
 }
 
-void act(const char *format, CHAR_DATA *ch, const void *arg1,
-				 const void *arg2, int type)
+void act(const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2, int type)
 {
 		/* to be compatible with older code */
 	act_new(format, ch, arg1, arg2, type, POS_RESTING);
+
+	return;
 }
 
 #define NAME(ch)	(IS_NPC(ch) ? ch->short_descr : ch->name)
-char *act_string(const char *format, CHAR_DATA *to, CHAR_DATA *ch,
-								 const void *arg1, const void *arg2)
+
+char *act_string(const char *format, CHAR_DATA *to, CHAR_DATA *ch, const void *arg1, const void *arg2)
 {
 	static char *const he_she[] = { "it", "he", "she" };
 	static char *const him_her[] = { "it", "him", "her" };
@@ -2576,76 +2718,109 @@ char *act_string(const char *format, CHAR_DATA *to, CHAR_DATA *ch,
 
 	bzero(buf, sizeof(buf));
 	point = buf;
+
 	while (*str) {
 		if (*str != '$') {
 			*point++ = *str++;
+
 			continue;
 		}
+
 		++str;
 
 		if (!arg2 && *str >= 'A' && *str <= 'Z') {
 			bug("Act: missing arg2 for code %d.", *str);
+
 			i = " <@@@> ";
 		} else {
 			switch (*str) {
 			default:
 				bug("Act: bad code %d.", *str);
+
 				i = " <@@@> ";
+
 				break;
 				/* Thx alex for 't' idea */
+
 			case 't':
 				i = (char *)arg1;
+
 				break;
+
 			case 'T':
 				i = (char *)arg2;
+
 				break;
+
 			case 'n':
 				i = (to ? PERS(ch, to) : NAME(ch));
+
 				break;
+
 			case 'N':
 				i = (to ? PERS(vch, to) : NAME(vch));
+
 				break;
+
 			case 'e':
 				i = he_she[URANGE(0, ch->sex, 2)];
+
 				break;
+
 			case 'E':
 				i = he_she[URANGE(0, vch->sex, 2)];
+
 				break;
+
 			case 'm':
 				i = him_her[URANGE(0, ch->sex, 2)];
+
 				break;
+
 			case 'M':
 				i = him_her[URANGE(0, vch->sex, 2)];
+
 				break;
+
 			case 's':
 				i = his_her[URANGE(0, ch->sex, 2)];
+
 				break;
+
 			case 'S':
 				i = his_her[URANGE(0, vch->sex, 2)];
+
 				break;
+
 			case 'p':
-				i = (!to || can_see_obj(to, obj1)
-						 ? obj1->short_descr : "something");
+				i = (!to || can_see_obj(to, obj1) ? obj1->short_descr : "something");
+
 				break;
+
 			case 'P':
-				i = (!to || can_see_obj(to, obj2)
-						 ? obj2->short_descr : "something");
+				i = (!to || can_see_obj(to, obj2) ? obj2->short_descr : "something");
+
 				break;
+
 			case 'd':
-				if (!arg2 || ((char *)arg2)[0] == '\0')
+				if (!arg2 || ((char *)arg2)[0] == '\0') {
 					i = "door";
-				else {
+				} else {
 					one_argument((char *)arg2, fname);
 					i = fname;
 				}
+
 				break;
 			}
 		}
 
 		++str;
-		while ((*point = *i))
+
+		while ((*point = *i)) {
 			++point, ++i;
+		}
 	}
+
 	*point++ = '`';
 	*point++ = 'w';
 	*point++ = '\n';
@@ -2656,8 +2831,7 @@ char *act_string(const char *format, CHAR_DATA *to, CHAR_DATA *ch,
 	return buf;
 }
 
-char *act_new(const char *format, CHAR_DATA *ch, const void *arg1,
-							const void *arg2, int type, int min_pos)
+char *act_new(const char *format, CHAR_DATA *ch, const void *arg1, const void *arg2, int type, int min_pos)
 {
 	char *txt = NULL;
 	CHAR_DATA *to;
@@ -2666,32 +2840,37 @@ char *act_new(const char *format, CHAR_DATA *ch, const void *arg1,
 	/*
 	 * Discard null and zero-length messages.
 	 */
-	if (!format || !format[0])
+	if (!format || !format[0]) {
 		return NULL;
+	}
 
 /* discard null rooms and chars */
 	if (!ch) {
 		bug("Act: null ch. (%s)", format);
+
 		return NULL;
 	}
 
-	if (!ch->in_room)
+	if (!ch->in_room) {
 		to = NULL;
-	else if (type == TO_CHAR)
+	} else if (type == TO_CHAR) {
 		to = ch;
-	else
+	} else {
 		to = ch->in_room->people;
+	}
 
 	if (type == TO_VICT) {
 		if (!vch) {
 			bug("Act: null vch with TO_VICT.");
 			bug("%s (%s)", ch->name, format);
+		
 			return NULL;
 		}
 
 		if (!vch->in_room) {
 			bug("Act: vch in NULL room!");
 			bug("%s -> %s (%s)", ch->name, vch->name, format);
+			
 			return NULL;
 		}
 
@@ -2712,25 +2891,32 @@ char *act_new(const char *format, CHAR_DATA *ch, const void *arg1,
 							 oprog_act_trigger(txt, to_obj, ch, (OBJ_DATA *)arg1, (void *)arg2);*/
 	}
 
-	for (; to; to = (type == TO_CHAR || type == TO_VICT)
-			 ? NULL : to->next_in_room) {
-		if ((!to->desc && (IS_NPC(to) &&
-											 !IS_SET(to->pIndexData->progtypes, ACT_PROG)))
-				|| to->position < min_pos)
+	for (; to; to = (type == TO_CHAR || type == TO_VICT) ? NULL : to->next_in_room) {
+		if ((!to->desc && (IS_NPC(to) && !IS_SET(to->pIndexData->progtypes, ACT_PROG))) || to->position < min_pos) {
 			continue;
+		}
 
-		if (type == TO_CHAR && to != ch)
+		if (type == TO_CHAR && to != ch) {
 			continue;
-		if (type == TO_VICT && (to != vch || to == ch))
+		}
+
+		if (type == TO_VICT && (to != vch || to == ch)) {
 			continue;
-		if (type == TO_ROOM && to == ch)
+		}
+
+		if (type == TO_ROOM && to == ch) {
 			continue;
-		if (type == TO_NOTVICT && (to == ch || to == vch))
+		}
+
+		if (type == TO_NOTVICT && (to == ch || to == vch)) {
 			continue;
+		}
 
 		txt = act_string(format, to, ch, arg1, arg2);
-		if (to->desc)
+		
+		if (to->desc) {
 			write_to_buffer(to->desc, txt, strlen(txt));
+		}
 
 		mprog_act_trigger(txt, ch);
 
@@ -2745,194 +2931,291 @@ char *act_new(const char *format, CHAR_DATA *ch, const void *arg1,
 	}
 
 	MOBtrigger = TRUE;
+
 	return txt;
 }
 
-void do_color(register char *inbuf, int inlen, register char *outbuf,
-							int outlen, bool color)
+void do_color(register char *inbuf, int inlen, register char *outbuf, int outlen, bool color)
 {
 	char *origin = inbuf;
 	char *origout = outbuf;
 
-	while (*inbuf != '\0' && origin + inlen > inbuf
-				 && origout + outlen > outbuf) {
+	while (*inbuf != '\0' && origin + inlen > inbuf && origout + outlen > outbuf) {
 		if (*inbuf != '`') {
 			*outbuf++ = *inbuf++;
+
 			continue;
 		}
 
 		if (origin + inlen - 1 <= ++inbuf) {
 			*outbuf = '\0';
+
 			return;
 		}
 
 		if (!color) {
-			if (*inbuf++ == '`')
+			if (*inbuf++ == '`') {
 				*outbuf++ = '`';
-		} else
+			}
+		} else {
 			switch (*inbuf++) {
 			case '0':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+				
 					return;
 				}
+
 				strcpy(outbuf, "[0m");
+
 				outbuf += 4;
+
 				break;
+
 			case 'k':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;30m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'K':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;30m");
 				outbuf += 7;
+
 				break;
+
 			case 'r':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;31m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'R':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;31m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'g':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;32m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'G':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;32m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'y':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;33m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'Y':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;33m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'b':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;34m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'B':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;34m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'm':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;35m");
+
 				outbuf += 7;
+
 				break;
 			case 'M':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;35m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'c':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;36m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'C':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;36m");
+
 				outbuf += 7;
+
 				break;
+
 			case 'w':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[0;37m");
+
 				outbuf += 7;
+
 				break;
 			case 'W':
 				if (origout + outlen - 7 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				strcpy(outbuf, "[1;37m");
+
 				outbuf += 7;
+
 				break;
+
 			case '`':
 				if (origout + outlen - 2 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				*outbuf++ = '`';
+
 				break;
+
 			default:
 				if (origout + outlen - 2 <= outbuf) {
 					*outbuf = '\0';
+
 					return;
 				}
+
 				*outbuf++ = '`';
 				*outbuf++ = *(inbuf - 1);
+
 				break;
 			}
+		}
 	}
 
 	if (color) {
 		if (origout + outlen - 7 <= outbuf) {
 			*outbuf = '\0';
+		
 			return;
 		}
+		
 		strcpy(outbuf, "[0m\0");
-	} else
+	} else {
 		*outbuf = '\0';
+	}
+
+	return;
 }
 
 char *figurestate(int current, int max)
@@ -2940,13 +3223,16 @@ char *figurestate(int current, int max)
 	static char status[40];
 
 	bzero(status, sizeof(status));
-	if (current >= (max / 3 * 2))
+
+	if (current >= (max / 3 * 2)) {
 		sprintf(status, "`W%d`w", current);
-	else if (current >= max / 3)
+	} else if (current >= max / 3) {
 		sprintf(status, "`Y%d`w", current);
-	else
+	} else {
 		sprintf(status, "`R%d`w", current);
-	return (status);
+	}
+
+	return status;
 }
 
 char *damstatus(CHAR_DATA *ch)
@@ -2955,27 +3241,32 @@ char *damstatus(CHAR_DATA *ch)
 	static char wound[40];
 
 	bzero(wound, sizeof(wound));
-	if (ch->max_hit > 0)
+	
+	if (ch->max_hit > 0) {
 		percent = ch->hit * 100 / ch->max_hit;
-	else
+	} else {
 		percent = -1;
-	if (percent >= 100)
+	}
+
+	if (percent >= 100) {
 		sprintf(wound, "excellent condition");
-	else if (percent >= 90)
+	} else if (percent >= 90) {
 		sprintf(wound, "few scratches");
-	else if (percent >= 75)
+	} else if (percent >= 75) {
 		sprintf(wound, "small wounds");
-	else if (percent >= 50)
+	} else if (percent >= 50) {
 		sprintf(wound, "quite a few wounds");
-	else if (percent >= 30)
+	} else if (percent >= 30) {
 		sprintf(wound, "nasty wounds");
-	else if (percent >= 15)
+	} else if (percent >= 15) {
 		sprintf(wound, "pretty hurt");
-	else if (percent >= 0)
+	} else if (percent >= 0) {
 		sprintf(wound, "awful condition");
-	else
+	} else {
 		sprintf(wound, "bleeding to death");
-	return (wound);
+	}
+
+	return wound;
 }
 
 char *doparseprompt(CHAR_DATA *ch)

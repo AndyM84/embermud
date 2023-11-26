@@ -411,20 +411,20 @@ break
 #12
 Mayor~
 Mayor wanders around the city opening and closing gates and he fights like a cleric.~
-M 10
 M 11
+M 10
 ~
 #20
 CityGuard~
 Kills thieves and fights evil.~
-M 17
 M 18
+M 17
 ~
 #24
 Puff~
 Figure it out. :)~
-M 22
 M 23
+M 22
 ~
 #0
 

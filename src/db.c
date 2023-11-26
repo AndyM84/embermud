@@ -272,8 +272,8 @@ void do_copyover(CHAR_DATA *ch, char *argument)
 {
 
 	#if defined(WIN32)
-	send_to_char("Sorry, copyover not yet available in the Win32 port.\n\r",
-							 ch);
+	send_to_char("Sorry, copyover not yet available in the Win32 port.\n\r", ch);
+	
 	return;
 	#else
 	char strPath[MAX_STRING_LENGTH];
@@ -281,8 +281,10 @@ void do_copyover(CHAR_DATA *ch, char *argument)
 	DESCRIPTOR_DATA *d, *d_next;
 	char buf[100], buf2[100];
 	int close args((int fd));
+	
 	if (IS_NPC(ch)) {
 		send_to_char("Mobs dont need to be hotbooting the mud.\n", ch);
+	
 		return;
 	}
 
@@ -292,6 +294,7 @@ void do_copyover(CHAR_DATA *ch, char *argument)
 	if (!fp) {
 		send_to_char("Copyover file not writeable, aborted.\n\r", ch);
 		perror("do_copyover:fopen");
+		
 		return;
 	}
 
@@ -299,20 +302,15 @@ void do_copyover(CHAR_DATA *ch, char *argument)
 
 	do_asave(ch, "changed");
 	do_force(ch, "all save");
-	sprintf(buf,
-					"\n\r\n\rThe earth splits in two, as %s remolds the world as you know it.\n\r",
-					ch->name);
+	sprintf(buf, "\n\r\n\rThe earth splits in two, as %s remolds the world as you know it.\n\r", ch->name);
 
  /* For each playing descriptor, save its state */
 	for (d = descriptor_list; d; d = d_next) {
 		CHAR_DATA *och = CH(d);
 		d_next = d->next;       /* We delete from the list , so need to save this */
 
-		if (!d->character || d->connected < 0)    /* drop those logging on */
-		{
-			write_to_descriptor(d->descriptor,
-													"\n\rSorry, we are rebooting. Come back in a few minutes.\n\r",
-													66);
+		if (!d->character || d->connected < 0) {   /* drop those logging on */
+			write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few minutes.\n\r", 66);
 			close_socket(d);  /* throw'em out */
 		} else {
 			fprintf(fp, "%d %s %s\n", d->descriptor, och->name, d->host);

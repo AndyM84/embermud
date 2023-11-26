@@ -2257,6 +2257,7 @@ void do_reboot(CHAR_DATA *ch, char *argument)
 void do_hotboo(CHAR_DATA *ch, char *argument)
 {
 	send_to_char("Type it all out if you want to hotboot the mud.\n\r", ch);
+
 	return;
 }
 
