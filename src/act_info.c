@@ -56,10 +56,8 @@ char *const where_name[] = {
 /*
  * Local functions.
  */
-char *format_obj_to_char args((OBJ_DATA *obj, CHAR_DATA *ch,
-															 bool fShort));
-void show_list_to_char args((OBJ_DATA *list, CHAR_DATA *ch,
-														 bool fShort, bool fShowNothing));
+char *format_obj_to_char args((OBJ_DATA *obj, CHAR_DATA *ch, bool fShort));
+void show_list_to_char args((OBJ_DATA *list, CHAR_DATA *ch, bool fShort, bool fShowNothing));
 void show_char_to_char_0 args((CHAR_DATA *victim, CHAR_DATA *ch));
 void show_char_to_char_1 args((CHAR_DATA *victim, CHAR_DATA *ch));
 void show_char_to_char args((CHAR_DATA *list, CHAR_DATA *ch));
@@ -135,21 +133,25 @@ void show_list_to_char(OBJ_DATA *list, CHAR_DATA *ch, bool fShort,
 	int count;
 	bool fCombine;
 
-	if (ch->desc == NULL)
+	if (ch->desc == NULL) {
 		return;
+	}
 
 /*
  * Alloc space for output lines.
  */
 	count = 0;
-	for (obj = list; obj != NULL; obj = obj->next_content)
+	
+	for (obj = list; obj != NULL; obj = obj->next_content) {
 		count++;
+	}
 
 /*
  * If there were no objects in the list, return and do nothing.
  */
-	if (count <= 0)
+	if (count <= 0) {
 		return;
+	}
 
 	prgpstrShow = alloc_mem(count * sizeof(char *));
 	prgnShow = alloc_mem(count * sizeof(int));
@@ -172,6 +174,7 @@ void show_list_to_char(OBJ_DATA *list, CHAR_DATA *ch, bool fShort,
 					if (!strcmp(prgpstrShow[iShow], pstrShow)) {
 						prgnShow[iShow]++;
 						fCombine = TRUE;
+
 						break;
 					}
 				}
@@ -200,14 +203,17 @@ void show_list_to_char(OBJ_DATA *list, CHAR_DATA *ch, bool fShort,
 				send_to_char("`g     ", ch);
 			}
 		}
+
 		send_to_char(prgpstrShow[iShow], ch);
 		send_to_char("\n\r`w", ch);
 		free_string(&prgpstrShow[iShow]);
 	}
 
 	if (fShowNothing && nShow == 0) {
-		if (IS_NPC(ch) || IS_SET(ch->comm, COMM_COMBINE))
+		if (IS_NPC(ch) || IS_SET(ch->comm, COMM_COMBINE)) {
 			send_to_char("`g     ", ch);
+		}
+
 		send_to_char("Nothing.\n\r`w", ch);
 	}
 
@@ -226,72 +232,102 @@ void show_char_to_char_0(CHAR_DATA *victim, CHAR_DATA *ch)
 	char message[MAX_STRING_LENGTH];
 	buf[0] = '\0';
 
-	if (IS_AFFECTED(victim, AFF_INVISIBLE))
+	if (IS_AFFECTED(victim, AFF_INVISIBLE)) {
 		strcat(buf, "`K(`bI`Bnvi`bs`K) `C");
-	if (IS_SET(victim->act, PLR_BUILDING) && !IS_NPC(victim))
+	}
+	
+	if (IS_SET(victim->act, PLR_BUILDING) && !IS_NPC(victim)) {
 		strcat(buf, "`W[`BBu`bildi`Bng`W] `C");
-	if (IS_AFFECTED(victim, AFF_HIDE))
+	}
+	
+	if (IS_AFFECTED(victim, AFF_HIDE)) {
 		strcat(buf, "`K(H`wi`Kdd`we`Kn) `C");
-	if (IS_AFFECTED(victim, AFF_CHARM))
+	}
+	
+	if (IS_AFFECTED(victim, AFF_CHARM)) {
 		strcat(buf, "`W(`GCh`garm`Ged`W) `C");
-	if (IS_AFFECTED(victim, AFF_PASS_DOOR))
+	}
+	
+	if (IS_AFFECTED(victim, AFF_PASS_DOOR)) {
 		strcat(buf, "`C(Tr`Wan`wslu`Wce`Cnt) `C");
-	if (IS_AFFECTED(victim, AFF_FAERIE_FIRE))
+	}
+	
+	if (IS_AFFECTED(victim, AFF_FAERIE_FIRE)) {
 		strcat(buf, "`W(`MP`mi`Mn`mk `MA`mu`Mr`ma`W) `C");
-	if (IS_EVIL(victim) && IS_AFFECTED(ch, AFF_DETECT_EVIL))
+	}
+	
+	if (IS_EVIL(victim) && IS_AFFECTED(ch, AFF_DETECT_EVIL)) {
 		strcat(buf, "`r(`RRe`Kd Au`Rra`r) `C");
-	if (IS_AFFECTED(victim, AFF_SANCTUARY))
+	}
+	
+	if (IS_AFFECTED(victim, AFF_SANCTUARY)) {
 		strcat(buf, "`W(`wWhi`Wte Au`wra`W) `C");
-	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_AFK))
+	}
+	
+	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_AFK)) {
 		strcat(buf, "`W(`CA`cF`CK`W) `C");
-	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_KILLER))
+	}
+	
+	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_KILLER)) {
 		strcat(buf, "`W(`RPK`W) `C");
-	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_THIEF))
+	}
+	
+	if (!IS_NPC(victim) && IS_SET(victim->act, PLR_THIEF)) {
 		strcat(buf, "`W(`YT`yHIE`YF`W) `C");
-	if (victim->position == victim->start_pos
-			&& victim->long_descr[0] != '\0') {
+	}
+	
+	if (victim->position == victim->start_pos && victim->long_descr[0] != '\0') {
 		strcat(buf, "`c");
 		strcat(buf, victim->long_descr);
 	}
-	if (IS_AFFECTED(victim, AFF_WEB) && IS_NPC(victim)
-			&& victim->position == victim->start_pos) {
+
+	if (IS_AFFECTED(victim, AFF_WEB) && IS_NPC(victim) && victim->position == victim->start_pos) {
 		strcat(buf, "`g");
 		strcat(buf, PERS(victim, ch));
 		strcat(buf, " is covered in sticky webs.\n`w");
 	}
-	if (victim->position == victim->start_pos
-			&& victim->long_descr[0] != '\0') {
+
+	if (victim->position == victim->start_pos && victim->long_descr[0] != '\0') {
 		if (!IS_NPC(victim)) {
 			send_to_char(buf, ch);
 			send_to_char("`w", ch);
-			return;
 
+			return;
 		}
-		if (IS_NPC(victim)
-				&& (victim->pIndexData->vnum != MOB_VNUM_SUPERMOB)) {
+
+		if (IS_NPC(victim) && (victim->pIndexData->vnum != MOB_VNUM_SUPERMOB)) {
 			send_to_char(buf, ch);
 			send_to_char("`w", ch);
+
 			return;
 		}
 	}
 
 	strcat(buf, PERS(victim, ch));
-	if (!IS_NPC(victim) && !IS_SET(ch->comm, COMM_BRIEF)
-			&& victim->position == POS_STANDING && ch->on == NULL)
+
+	if (!IS_NPC(victim) && !IS_SET(ch->comm, COMM_BRIEF) && victim->position == POS_STANDING && ch->on == NULL) {
 		strcat(buf, victim->pcdata->title);
+	}
 
 	switch (victim->position) {
 	case POS_DEAD:
 		strcat(buf, " `Cis DEAD!!");
+
 		break;
+
 	case POS_MORTAL:
 		strcat(buf, " `Cis mortally wounded.");
+
 		break;
+
 	case POS_INCAP:
 		strcat(buf, " `Cis incapacitated.");
+
 		break;
+
 	case POS_STUNNED:
 		strcat(buf, " `Cis lying here stunned.");
+
 		break;
 /*      case POS_SLEEPING: strcat( buf, " `Cis sleeping here." );      break;
 			case POS_RESTING:  strcat( buf, " `Cis resting here." );       break;
@@ -301,106 +337,115 @@ void show_char_to_char_0(CHAR_DATA *victim, CHAR_DATA *ch)
 	case POS_SLEEPING:
 		if (victim->on != NULL) {
 			if (IS_SET(victim->on->value[2], SLEEP_AT)) {
-				sprintf(message, " is sleeping at %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sleeping at %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else if (IS_SET(victim->on->value[2], SLEEP_ON)) {
-				sprintf(message, " is sleeping on %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sleeping on %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else {
-				sprintf(message, " is sleeping in %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sleeping in %s.", victim->on->short_descr);
 				strcat(buf, message);
 			}
-		} else
+		} else {
 			strcat(buf, " is sleeping here.");
+		}
+
 		break;
+
 	case POS_RESTING:
 		if (victim->on != NULL) {
 			if (IS_SET(victim->on->value[2], REST_AT)) {
-				sprintf(message, " is resting at %s.",
-								victim->on->short_descr);
+				sprintf(message, " is resting at %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else if (IS_SET(victim->on->value[2], REST_ON)) {
-				sprintf(message, " is resting on %s.",
-								victim->on->short_descr);
+				sprintf(message, " is resting on %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else {
-				sprintf(message, " is resting in %s.",
-								victim->on->short_descr);
+				sprintf(message, " is resting in %s.", victim->on->short_descr);
 				strcat(buf, message);
 			}
-		} else
+		} else {
 			strcat(buf, " is resting here.");
+		}
+
 		break;
+
 	case POS_SITTING:
 		if (victim->on != NULL) {
 			if (IS_SET(victim->on->value[2], SIT_AT)) {
-				sprintf(message, " is sitting at %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sitting at %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else if (IS_SET(victim->on->value[2], SIT_ON)) {
-				sprintf(message, " is sitting on %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sitting on %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else {
-				sprintf(message, " is sitting in %s.",
-								victim->on->short_descr);
+				sprintf(message, " is sitting in %s.", victim->on->short_descr);
 				strcat(buf, message);
 			}
-		} else
+		} else {
 			strcat(buf, " is sitting here.");
+		}
+
 		break;
+
 	case POS_STANDING:
 		if (victim->on != NULL) {
 			if (IS_SET(victim->on->value[2], STAND_AT)) {
-				sprintf(message, " is standing at %s.",
-								victim->on->short_descr);
+				sprintf(message, " is standing at %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else if (IS_SET(victim->on->value[2], STAND_ON)) {
-				sprintf(message, " is standing on %s.",
-								victim->on->short_descr);
+				sprintf(message, " is standing on %s.", victim->on->short_descr);
 				strcat(buf, message);
 			} else {
-				sprintf(message, " is standing in %s.",
-								victim->on->short_descr);
+				sprintf(message, " is standing in %s.", victim->on->short_descr);
 				strcat(buf, message);
 			}
-		} else
+		} else {
 			strcat(buf, " is here.");
+		}
+
 		break;
+
 	case POS_FIGHTING:
 		strcat(buf, " is here, fighting ");
-		if (victim->fighting == NULL)
+
+		if (victim->fighting == NULL) {
 			strcat(buf, "thin air??");
-		else if (victim->fighting == ch)
+		}	else if (victim->fighting == ch) {
 			strcat(buf, "YOU!");
-		else if (victim->in_room == victim->fighting->in_room) {
+		} else if (victim->in_room == victim->fighting->in_room) {
 			strcat(buf, PERS(victim->fighting, ch));
 			strcat(buf, ".");
-		} else
+		} else {
 			strcat(buf, "somone who left??");
+		}
+
 		break;
 	}
+
 	if (IS_AFFECTED(victim, AFF_WEB)) {
 		strcat(buf, "\n\r`g");
 		strcat(buf, PERS(victim, ch));
 		strcat(buf, " is covered in sticky webs.`w");
 	}
+
 	strcat(buf, "\n\r`w");
 	buf[0] = UPPER(buf[0]);
 
 	if (!IS_NPC(victim)) {
 		send_to_char("`C", ch);
 		send_to_char(buf, ch);
+
 		return;
 	}
+
 	if (IS_NPC(victim) && (victim->pIndexData->vnum != MOB_VNUM_SUPERMOB)) {
 		send_to_char("`C", ch);
 		send_to_char(buf, ch);
+
 		return;
 	}
+
 	return;
 }
 
@@ -415,9 +460,9 @@ void show_char_to_char_1(CHAR_DATA *victim, CHAR_DATA *ch)
 	bool found;
 
 	if (can_see(victim, ch)) {
-		if (ch == victim)
+		if (ch == victim) {
 			act("$n looks at $mself.", ch, NULL, NULL, TO_ROOM);
-		else {
+		} else {
 			act("$n looks at you.", ch, NULL, victim, TO_VICT);
 			act("$n looks at $N.", ch, NULL, victim, TO_NOTVICT);
 		}
@@ -430,37 +475,39 @@ void show_char_to_char_1(CHAR_DATA *victim, CHAR_DATA *ch)
 		act("You see nothing special about $M.", ch, NULL, victim, TO_CHAR);
 	}
 
-	if (victim->max_hit > 0)
+	if (victim->max_hit > 0) {
 		percent = (100 * victim->hit) / victim->max_hit;
-	else
+	} else {
 		percent = -1;
+	}
 
 	strcpy(buf, PERS(victim, ch));
 
-	if (percent >= 100)
+	if (percent >= 100) {
 		strcat(buf, " is in excellent condition.\n\r");
-	else if (percent >= 90)
+	} else if (percent >= 90) {
 		strcat(buf, " has a few scratches.\n\r");
-	else if (percent >= 75)
+	} else if (percent >= 75) {
 		strcat(buf, " has some small wounds and bruises.\n\r");
-	else if (percent >= 50)
+	} else if (percent >= 50) {
 		strcat(buf, " has quite a few wounds.\n\r");
-	else if (percent >= 30)
+	} else if (percent >= 30) {
 		strcat(buf, " has some big nasty wounds and scratches.\n\r");
-	else if (percent >= 15)
+	} else if (percent >= 15) {
 		strcat(buf, " looks pretty hurt.\n\r");
-	else if (percent >= 0)
+	} else if (percent >= 0) {
 		strcat(buf, " is in awful condition.\n\r");
-	else
+	} else {
 		strcat(buf, " is `Rbleeding to death.`w\n\r");
+	}
 
 	buf[0] = UPPER(buf[0]);
 	send_to_char(buf, ch);
 
 	found = FALSE;
+
 	for (iWear = 0; iWear < MAX_WEAR; iWear++) {
-		if ((obj = get_eq_char(victim, iWear)) != NULL
-				&& can_see_obj(ch, obj)) {
+		if ((obj = get_eq_char(victim, iWear)) != NULL && can_see_obj(ch, obj)) {
 			if (!found) {
 				send_to_char("\n\r", ch);
 				act("$N is using:", ch, NULL, victim, TO_CHAR);
@@ -485,9 +532,7 @@ void show_char_to_char_1(CHAR_DATA *victim, CHAR_DATA *ch)
 		}
 	}
 
-	if (victim != ch
-			&& !IS_NPC(ch)
-			&& number_percent() < ch->pcdata->learned[gsn_peek]) {
+	if (victim != ch && !IS_NPC(ch) && number_percent() < ch->pcdata->learned[gsn_peek]) {
 		send_to_char("\n\rYou peek at the inventory:\n\r", ch);
 		check_improve(ch, gsn_peek, TRUE, 4);
 		show_list_to_char(victim->carrying, ch, TRUE, TRUE);
@@ -501,20 +546,18 @@ void show_char_to_char(CHAR_DATA *list, CHAR_DATA *ch)
 	CHAR_DATA *rch;
 
 	for (rch = list; rch != NULL; rch = rch->next_in_room) {
-		if (rch == ch)
+		if (rch == ch) {
 			continue;
+		}
 
-		if (!IS_NPC(rch)
-				&& IS_SET(rch->act, PLR_WIZINVIS)
-				&& get_trust(ch) < rch->invis_level)
+		if (!IS_NPC(rch) && IS_SET(rch->act, PLR_WIZINVIS) && get_trust(ch) < rch->invis_level) {
 			continue;
+		}
 
 		if (can_see(ch, rch)) {
 			show_char_to_char_0(rch, ch);
-		} else if (room_is_dark(ch->in_room)
-							&& IS_AFFECTED(rch, AFF_INFRARED)) {
-			send_to_char("`RYou see glowing red eyes watching you!\n\r`w",
-									 ch);
+		} else if (room_is_dark(ch->in_room) && IS_AFFECTED(rch, AFF_INFRARED)) {
+			send_to_char("`RYou see glowing red eyes watching you!\n\r`w", ch);
 		}
 	}
 
@@ -524,11 +567,13 @@ void show_char_to_char(CHAR_DATA *list, CHAR_DATA *ch)
 bool check_blind(CHAR_DATA *ch)
 {
 
-	if (!IS_NPC(ch) && IS_SET(ch->act, PLR_HOLYLIGHT))
+	if (!IS_NPC(ch) && IS_SET(ch->act, PLR_HOLYLIGHT)) {
 		return TRUE;
+	}
 
 	if (IS_AFFECTED(ch, AFF_BLIND)) {
 		send_to_char("You can't see a thing!\n\r", ch);
+
 		return FALSE;
 	}
 
@@ -546,18 +591,19 @@ void do_scroll(CHAR_DATA *ch, char *argument)
 	one_argument(argument, arg);
 
 	if (arg[0] == '\0') {
-		if (ch->lines == 0)
+		if (ch->lines == 0) {
 			send_to_char("You do not page long messages.\n\r", ch);
-		else {
-			sprintf(buf, "You currently display %d lines per page.\n\r",
-							ch->lines + 2);
+		} else {
+			sprintf(buf, "You currently display %d lines per page.\n\r", ch->lines + 2);
 			send_to_char(buf, ch);
 		}
+
 		return;
 	}
 
 	if (!is_number(arg)) {
 		send_to_char("You must provide a number.\n\r", ch);
+
 		return;
 	}
 
@@ -566,17 +612,21 @@ void do_scroll(CHAR_DATA *ch, char *argument)
 	if (lines == 0) {
 		send_to_char("Paging disabled.\n\r", ch);
 		ch->lines = 0;
+
 		return;
 	}
 
 	if (lines < 10 || lines > 100) {
 		send_to_char("You must provide a reasonable number.\n\r", ch);
+
 		return;
 	}
 
 	sprintf(buf, "Scroll set to %d lines.\n\r", lines);
 	send_to_char(buf, ch);
 	ch->lines = lines - 2;
+
+	return;
 }
 
 /* RT does socials */
@@ -585,123 +635,158 @@ void do_scroll(CHAR_DATA *ch, char *argument)
 void do_news(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "news");
+
+	return;
 }
 
 void do_motd(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "motd");
+
+	return;
 }
 
 void do_imotd(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "imotd");
+
+	return;
 }
 
 void do_rules(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "rules");
+
+	return;
 }
 
 void do_story(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "story");
+
+	return;
 }
 
 void do_changes(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "changes");
+
+	return;
 }
 
 void do_wizlist(CHAR_DATA *ch, char *argument)
 {
 	do_help(ch, "wizlist");
+
+	return;
 }
 
 void do_autolist(CHAR_DATA *ch, char *argument)
 {
 		/* lists most player flags */
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	send_to_char("   action     status\n\r", ch);
 	send_to_char("---------------------\n\r", ch);
 
 	send_to_char("autoassist     ", ch);
-	if (IS_SET(ch->act, PLR_AUTOASSIST))
+
+	if (IS_SET(ch->act, PLR_AUTOASSIST)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("autoexit       ", ch);
-	if (IS_SET(ch->act, PLR_AUTOEXIT))
+	
+	if (IS_SET(ch->act, PLR_AUTOEXIT)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("autogold       ", ch);
-	if (IS_SET(ch->act, PLR_AUTOGOLD))
+	
+	if (IS_SET(ch->act, PLR_AUTOGOLD)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("autoloot       ", ch);
-	if (IS_SET(ch->act, PLR_AUTOLOOT))
+
+	if (IS_SET(ch->act, PLR_AUTOLOOT)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("autosac        ", ch);
-	if (IS_SET(ch->act, PLR_AUTOSAC))
+	
+	if (IS_SET(ch->act, PLR_AUTOSAC)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("autosplit      ", ch);
-	if (IS_SET(ch->act, PLR_AUTOSPLIT))
+
+	if (IS_SET(ch->act, PLR_AUTOSPLIT)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("prompt         ", ch);
-	if (IS_SET(ch->comm, COMM_PROMPT))
+
+	if (IS_SET(ch->comm, COMM_PROMPT)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
 	send_to_char("combine items  ", ch);
-	if (IS_SET(ch->comm, COMM_COMBINE))
+	
+	if (IS_SET(ch->comm, COMM_COMBINE)) {
 		send_to_char("`GON`w\n\r", ch);
-	else
+	} else {
 		send_to_char("`ROFF`w\n\r", ch);
+	}
 
-	if (!IS_SET(ch->act, PLR_CANLOOT))
+	if (!IS_SET(ch->act, PLR_CANLOOT)) {
 		send_to_char("Your corpse is safe from thieves.\n\r", ch);
-	else
+	} else {
 		send_to_char("Your corpse may be looted.\n\r", ch);
+	}
 
-	if (IS_SET(ch->act, PLR_NOSUMMON))
-		send_to_char
-		("You cannot be summoned. There may be exceptions to this!\n\r",
-		 ch);
-	else
+	if (IS_SET(ch->act, PLR_NOSUMMON)) {
+		send_to_char("You cannot be summoned. There may be exceptions to this!\n\r", ch);
+	} else {
 		send_to_char("You can be summoned.\n\r", ch);
+	}
 
-	if (IS_SET(ch->act, PLR_NOFOLLOW))
+	if (IS_SET(ch->act, PLR_NOFOLLOW)) {
 		send_to_char("You do not welcome followers.\n\r", ch);
-	else
+	} else {
 		send_to_char("You accept followers.\n\r", ch);
+	}
 
-	if (IS_SET(ch->act, PLR_COLOR))
-		send_to_char("You have ansi `Yc`Ro`Bl`Co`Gr`w turned `Yon`w.\n\r",
-								 ch);
-	else
+	if (IS_SET(ch->act, PLR_COLOR)) {
+		send_to_char("You have ansi `Yc`Ro`Bl`Co`Gr`w turned `Yon`w.\n\r", ch);
+	} else {
 		send_to_char("You have ansi color turned off.\n\r", ch);
+	}
+
+	return;
 }
 
 void do_autoassist(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOASSIST)) {
 		send_to_char("Autoassist removed.\n\r", ch);
@@ -710,12 +795,15 @@ void do_autoassist(CHAR_DATA *ch, char *argument)
 		send_to_char("You will now assist when needed.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOASSIST);
 	}
+
+	return;
 }
 
 void do_autoexit(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOEXIT)) {
 		send_to_char("Exits will no longer be displayed.\n\r", ch);
@@ -724,12 +812,15 @@ void do_autoexit(CHAR_DATA *ch, char *argument)
 		send_to_char("Exits will now be displayed.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOEXIT);
 	}
+
+	return;
 }
 
 void do_autogold(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOGOLD)) {
 		send_to_char("Autogold removed.\n\r", ch);
@@ -738,12 +829,15 @@ void do_autogold(CHAR_DATA *ch, char *argument)
 		send_to_char("Automatic gold looting set.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOGOLD);
 	}
+
+	return;
 }
 
 void do_autoloot(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOLOOT)) {
 		send_to_char("Autolooting removed.\n\r", ch);
@@ -752,12 +846,15 @@ void do_autoloot(CHAR_DATA *ch, char *argument)
 		send_to_char("Automatic corpse looting set.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOLOOT);
 	}
+
+	return;
 }
 
 void do_autosac(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOSAC)) {
 		send_to_char("Autosacrificing removed.\n\r", ch);
@@ -766,12 +863,15 @@ void do_autosac(CHAR_DATA *ch, char *argument)
 		send_to_char("Automatic corpse sacrificing set.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOSAC);
 	}
+
+	return;
 }
 
 void do_autosplit(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AUTOSPLIT)) {
 		send_to_char("Autosplitting removed.\n\r", ch);
@@ -780,6 +880,8 @@ void do_autosplit(CHAR_DATA *ch, char *argument)
 		send_to_char("Automatic gold splitting set.\n\r", ch);
 		SET_BIT(ch->act, PLR_AUTOSPLIT);
 	}
+
+	return;
 }
 
 void do_brief(CHAR_DATA *ch, char *argument)
@@ -791,6 +893,8 @@ void do_brief(CHAR_DATA *ch, char *argument)
 		send_to_char("Short descriptions activated.\n\r", ch);
 		SET_BIT(ch->comm, COMM_BRIEF);
 	}
+
+	return;
 }
 
 void do_compact(CHAR_DATA *ch, char *argument)
@@ -802,6 +906,8 @@ void do_compact(CHAR_DATA *ch, char *argument)
 		send_to_char("Compact mode set.\n\r", ch);
 		SET_BIT(ch->comm, COMM_COMPACT);
 	}
+
+	return;
 }
 
 void do_prompt(CHAR_DATA *ch, char *argument)
@@ -809,40 +915,30 @@ void do_prompt(CHAR_DATA *ch, char *argument)
 	if (!IS_NPC(ch)) {
 		if (!strcmp(argument, "default")) {
 			free_string(&ch->pcdata->prompt);
-			ch->pcdata->prompt =
-				str_dup("%i`K/`W%H`w HP %n`K/`W%M`w MP %w`K/`W%V`w MV `K> ");
-		}
-
-		else if (!strcmp(argument, "combat")) {
+			ch->pcdata->prompt = str_dup("%i`K/`W%H`w HP %n`K/`W%M`w MP %w`K/`W%V`w MV `K> ");
+		} else if (!strcmp(argument, "combat")) {
 			free_string(&ch->pcdata->prompt);
-			ch->pcdata->prompt =
-				str_dup
-				("`gTank: %l  `rEnemy: %e%r%i`K/`W%H `wHP %n`K/`W%M `wMP %w`K/`W%V `wMV `K>");
-		}
-
-		else if (!strcmp(argument, "ghioti")) {
+			ch->pcdata->prompt = str_dup("`gTank: %l  `rEnemy: %e%r%i`K/`W%H `wHP %n`K/`W%M `wMP %w`K/`W%V `wMV `K>");
+		} else if (!strcmp(argument, "ghioti")) {
 			free_string(&ch->pcdata->prompt);
-			ch->pcdata->prompt =
-				str_dup
-				("`cMe: %s  `gTank: %l  `rEnemy: %e`w%r<%i/%Hhp %n/%Mm %w/%Vmv %Xtnl>");
-		}
-
-		else if (IS_IMMORTAL(ch) && !strcmp(argument, "imm")) {
+			ch->pcdata->prompt = str_dup("`cMe: %s  `gTank: %l  `rEnemy: %e`w%r<%i/%Hhp %n/%Mm %w/%Vmv %Xtnl>");
+		} else if (IS_IMMORTAL(ch) && !strcmp(argument, "imm")) {
 			free_string(&ch->pcdata->prompt);
-			ch->pcdata->prompt =
-				str_dup
-				(" %B `cRoom: `C%# `gTime: `G%T `wActs: `W%A%r`Y:>`W `w");
-		}
-
-		else {
+			ch->pcdata->prompt = str_dup(" %B `cRoom: `C%# `gTime: `G%T `wActs: `W%A%r`Y:>`W `w");
+		} else {
 			free_string(&ch->pcdata->prompt);
 			smash_tilde(argument);
 			ch->pcdata->prompt = str_dup(argument);
 		}
+
 		send_to_char("Prompt set.\n\r", ch);
+
 		return;
-	} else
+	} else {
 		send_to_char("Mobiles may not change thier prompts.\n\r", ch);
+	}
+
+	return;
 }
 
 void do_combine(CHAR_DATA *ch, char *argument)
@@ -854,12 +950,15 @@ void do_combine(CHAR_DATA *ch, char *argument)
 		send_to_char("Combined inventory selected.\n\r", ch);
 		SET_BIT(ch->comm, COMM_COMBINE);
 	}
+
+	return;
 }
 
 void do_noloot(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_CANLOOT)) {
 		send_to_char("Your corpse is now safe from thieves.\n\r", ch);
@@ -868,12 +967,15 @@ void do_noloot(CHAR_DATA *ch, char *argument)
 		send_to_char("Your corpse may now be looted.\n\r", ch);
 		SET_BIT(ch->act, PLR_CANLOOT);
 	}
+
+	return;
 }
 
 void do_nofollow(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_NOFOLLOW)) {
 		send_to_char("You now accept followers.\n\r", ch);
@@ -881,9 +983,13 @@ void do_nofollow(CHAR_DATA *ch, char *argument)
 	} else {
 		send_to_char("You no longer accept followers.\n\r", ch);
 		SET_BIT(ch->act, PLR_NOFOLLOW);
-		if (!IS_AFFECTED(ch, AFF_CHARM))    /* bugfix... if a pc was charmed you could type nofollow to become uncharmed. */
+		
+		if (!IS_AFFECTED(ch, AFF_CHARM)) {   /* bugfix... if a pc was charmed you could type nofollow to become uncharmed. */
 			die_follower(ch);
+		}
 	}
+
+	return;
 }
 
 void do_nosummon(CHAR_DATA *ch, char *argument)
@@ -907,6 +1013,8 @@ void do_nosummon(CHAR_DATA *ch, char *argument)
 			SET_BIT(ch->act, PLR_NOSUMMON);
 		}
 	}
+
+	return;
 }
 
 void do_nocolor(CHAR_DATA *ch, char *argument)
@@ -918,56 +1026,62 @@ void do_nocolor(CHAR_DATA *ch, char *argument)
 		send_to_char("You can see in `Yc`Ro`Bl`Co`Gr`w.\n\r", ch);
 		SET_BIT(ch->act, PLR_COLOR);
 	}
+
+	return;
 }
 
 void do_afk(CHAR_DATA *ch, char *argument)
 {
 	char buf2[MAX_STRING_LENGTH];
 
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (IS_SET(ch->act, PLR_AFK)) {
 		send_to_char("You are no longer set AFK.\n\r", ch);
 		REMOVE_BIT(ch->act, PLR_AFK);
+
 		if (ch->pcdata->message != NULL) {
-			sprintf(buf2,
-							"You have `W%d message%s`w waiting, type `Wmessages`w to read them.\n\r",
-							ch->pcdata->messages,
-							(ch->pcdata->messages > 1) ? "s" : "");
+			sprintf(buf2, "You have `W%d message%s`w waiting, type `Wmessages`w to read them.\n\r", ch->pcdata->messages, (ch->pcdata->messages > 1) ? "s" : "");
 			send_to_char(buf2, ch);
 		}
+
 		act("`R$n returns to $s keyboard.`w", ch, NULL, NULL, TO_ROOM);
 		sprintf(buf2, "%s is no-longer AFK.", ch->name);
-		if (!IS_SET(ch->act, PLR_WIZINVIS))
+
+		if (!IS_SET(ch->act, PLR_WIZINVIS)) {
 			do_sendinfo(ch, buf2);
+		}
 	} else {
-		send_to_char("You are now set AFK.  Messages are being recorded.\n\r",
-								 ch);
+		send_to_char("You are now set AFK.  Messages are being recorded.\n\r", ch);
 		SET_BIT(ch->act, PLR_AFK);
-		act("`W$n is away from $s keyboard for awhile.`w", ch, NULL, NULL,
-				TO_ROOM);
+		act("`W$n is away from $s keyboard for awhile.`w", ch, NULL, NULL, TO_ROOM);
 		sprintf(buf2, "%s has gone AFK.", ch->name);
-		if (!IS_SET(ch->act, PLR_WIZINVIS))
+
+		if (!IS_SET(ch->act, PLR_WIZINVIS)) {
 			do_sendinfo(ch, buf2);
+		}
 	}
+
+	return;
 }
 
 void do_anonymous(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (ch->anonymous == TRUE) {
-		send_to_char("You are no longer `KA`wN`WO`wN`KY`wM`WO`wU`KS`W.\n\r",
-								 ch);
+		send_to_char("You are no longer `KA`wN`WO`wN`KY`wM`WO`wU`KS`W.\n\r", ch);
 		ch->anonymous = FALSE;
 	} else {
-		send_to_char
-		("You are now set `KA`wN`WO`wN`KY`wM`WO`wU`KS`w.  Your Level, Race, and Class will no longer be displayed under \"who\".\n\r",
-		 ch);
+		send_to_char("You are now set `KA`wN`WO`wN`KY`wM`WO`wU`KS`w.  Your Level, Race, and Class will no longer be displayed under \"who\".\n\r", ch);
 		ch->anonymous = TRUE;
 	}
+
+	return;
 }
 
 void do_pk(CHAR_DATA *ch, char *argument)
@@ -975,52 +1089,58 @@ void do_pk(CHAR_DATA *ch, char *argument)
 	char buf2[MAX_STRING_LENGTH];
 	CLAN_DATA *clan;
 
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (ch->pcdata->confirm_pk) {
 		if (argument[0] != '\0') {
 			send_to_char("PK readiness status removed.\n\r", ch);
 			ch->pcdata->confirm_pk = FALSE;
+		
 			return;
 		} else {
-			if (IS_SET(ch->act, PLR_KILLER))
+			if (IS_SET(ch->act, PLR_KILLER)) {
 				return;
+			}
+
 			SET_BIT(ch->act, PLR_KILLER);
 			act("`R$n glows briefly with a red aura, you get the feeling you should keep your distance.`w", ch, NULL, NULL, TO_ROOM);
-			send_to_char
-			("`RYou are now a Player Killer, good luck, you'll need it.\n\r`w",
-			 ch);
+			send_to_char("`RYou are now a Player Killer, good luck, you'll need it.\n\r`w", ch);
 			sprintf(buf2, "%s has become a player killer!", ch->name);
 			do_sendinfo(ch, buf2);
+			
 			return;
 		}
 	}
 
 	if (argument[0] != '\0') {
 		send_to_char("Just type pk. No argument.\n\r", ch);
+
 		return;
 	}
+
 	if (ch->pcdata->clan != 0) {
 		clan = get_clan(ch->pcdata->clan);
+
 		if (IS_SET(clan->join_flags, CLAN_NO_PK)) {
 			send_to_char("Your clan does not allow PK!\n\r", ch);
+
 			return;
 		}
 	}
 
 	send_to_char("Type pk again to confirm this command.\n\r", ch);
 	send_to_char("WARNING: this command is virtually irreversible.\n\r", ch);
-	send_to_char
-	("If you don't know what pk is for read help pk, DON'T type this command again.\n\r",
-	 ch);
-	send_to_char
-	("Typing pk with an argument will undo pk readiness status.\n\r", ch);
+	send_to_char("If you don't know what pk is for read help pk, DON'T type this command again.\n\r", ch);
+	send_to_char("Typing pk with an argument will undo pk readiness status.\n\r", ch);
+	
 	ch->pcdata->confirm_pk = TRUE;
+
+	return;
 }
 
-void eval_dir(char *dir, int mov_dir, int num, CHAR_DATA *ch, int *see,
-							ROOM_INDEX_DATA *first_room)
+void eval_dir(char *dir, int mov_dir, int num, CHAR_DATA *ch, int *see, ROOM_INDEX_DATA *first_room)
 {
 	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *mob_in_room;
@@ -1029,36 +1149,34 @@ void eval_dir(char *dir, int mov_dir, int num, CHAR_DATA *ch, int *see,
 		if (*see < 1) {
 			sprintf(buf, "  `W%s `wfrom you is hidden in darkness.\n\r", dir);
 			send_to_char(buf, ch);
+
 			return;
 		} else {
-			send_to_char
-			("     It's too dark to see any further in this direction.\n\r",
-			 ch);
+			send_to_char("     It's too dark to see any further in this direction.\n\r", ch);
+
 			return;
 		}
 	}
 
-	for (mob_in_room = first_room->people; mob_in_room != NULL;
-			 mob_in_room = mob_in_room->next_in_room) {
-
+	for (mob_in_room = first_room->people; mob_in_room != NULL; mob_in_room = mob_in_room->next_in_room) {
 		if (can_see(ch, mob_in_room)) {
-
 			if (*see == 0) {
 				sprintf(buf, "  `W%s `wfrom you, you see :\n\r", dir);
 				send_to_char(buf, ch);
 				*see += 1;
 			}
+
 			if (!IS_NPC(mob_in_room)) {
-				sprintf(buf, "     %s%s - %d %s\n\r", mob_in_room->name,
-								mob_in_room->pcdata->title, num, dir);
+				sprintf(buf, "     %s%s - %d %s\n\r", mob_in_room->name, mob_in_room->pcdata->title, num, dir);
 				send_to_char(buf, ch);
 			} else {
-				sprintf(buf, "     %s - %d %s\n\r",
-								mob_in_room->short_descr, num, dir);
+				sprintf(buf, "     %s - %d %s\n\r", mob_in_room->short_descr, num, dir);
 				send_to_char(buf, ch);
 			}
 		}
 	}
+
+	return;
 }
 
 void show_dir_mobs(char *dir, int move_dir, CHAR_DATA *ch, int depth)
@@ -1068,13 +1186,12 @@ void show_dir_mobs(char *dir, int move_dir, CHAR_DATA *ch, int depth)
 	int see = 0;
 	int i;
 
-	for (i = 1; (i <= depth && (pexit = cur_room->exit[move_dir])
-							 && pexit->u1.to_room
-							 && pexit->u1.to_room != cur_room)
-			 && !IS_SET(pexit->exit_info, EX_CLOSED); i++) {
+	for (i = 1; (i <= depth && (pexit = cur_room->exit[move_dir]) && pexit->u1.to_room && pexit->u1.to_room != cur_room) && !IS_SET(pexit->exit_info, EX_CLOSED); i++) {
 		cur_room = pexit->u1.to_room;
 		eval_dir(dir, move_dir, i, ch, &see, cur_room);
 	}
+
+	return;
 }
 
 char *dir_text[] = { "North", "East", "South", "West", "Up", "Down" };
@@ -1086,32 +1203,30 @@ void do_scan(CHAR_DATA *ch, char *argument)
 	int door;
 
 	if (room_is_dark(ch->in_room)) {
-		send_to_char("It's too dark in here, you can't see anything!\n\r",
-								 ch);
+		send_to_char("It's too dark in here, you can't see anything!\n\r", ch);
+
 		return;
 	}
 
-	for (mob_in_room = ch->in_room->people; mob_in_room != NULL;
-			 mob_in_room = mob_in_room->next_in_room) {
+	for (mob_in_room = ch->in_room->people; mob_in_room != NULL; mob_in_room = mob_in_room->next_in_room) {
 		if (can_see(ch, mob_in_room)) {
-
 			if (!IS_NPC(mob_in_room)) {
-				sprintf(buf, "     %s%s - right here.\n\r",
-								mob_in_room->name, mob_in_room->pcdata->title);
+				sprintf(buf, "     %s%s - right here.\n\r", mob_in_room->name, mob_in_room->pcdata->title);
 				send_to_char(buf, ch);
 			} else {
-				sprintf(buf, "     %s - right here.\n\r",
-								mob_in_room->short_descr);
+				sprintf(buf, "     %s - right here.\n\r", mob_in_room->short_descr);
 				send_to_char(buf, ch);
 			}
-
 		}
-
 	}
-	for (door = 0; door <= 5; door++)
+
+	for (door = 0; door <= 5; door++) {
 		show_dir_mobs(dir_text[door], door, ch, 3);
+	}
+
 	act("$n scans $s surroundings.", ch, NULL, NULL, TO_ROOM);
 
+	return;
 }
 
 void do_effects(CHAR_DATA *ch, char *argument)
@@ -1124,66 +1239,88 @@ void do_effects(CHAR_DATA *ch, char *argument)
 	switch (ch->position) {
 	case POS_DEAD:
 		send_to_char("You are DEAD!!\n\r", ch);
+
 		break;
+
 	case POS_MORTAL:
 		send_to_char("You are mortally wounded.\n\r", ch);
+
 		break;
+
 	case POS_INCAP:
 		send_to_char("You are incapacitated.\n\r", ch);
+
 		break;
+
 	case POS_STUNNED:
 		send_to_char("You are stunned.\n\r", ch);
+
 		break;
+
 	case POS_SLEEPING:
 		send_to_char("You are sleeping.\n\r", ch);
+
 		break;
+
 	case POS_RESTING:
 		send_to_char("You are resting.\n\r", ch);
+
 		break;
+
 	case POS_STANDING:
 		send_to_char("You are standing.\n\r", ch);
+
 		break;
+
 	case POS_FIGHTING:
 		send_to_char("You are fighting.\n\r", ch);
+
 		break;
 	}
-	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10)
+
+	if (!IS_NPC(ch) && ch->pcdata->condition[COND_DRUNK] > 10) {
 		send_to_char("You are drunk.\n\r", ch);
-	if (!IS_NPC(ch) && ch->pcdata->condition[COND_THIRST] == 0)
+	}
+
+	if (!IS_NPC(ch) && ch->pcdata->condition[COND_THIRST] == 0) {
 		send_to_char("You are thirsty.\n\r", ch);
-	if (!IS_NPC(ch) && ch->pcdata->condition[COND_FULL] == 0)
+	}
+
+	if (!IS_NPC(ch) && ch->pcdata->condition[COND_FULL] == 0) {
 		send_to_char("You are hungry.\n\r", ch);
+	}
+
 	if (ch->affected != NULL) {
 		send_to_char("You are affected by:\n\r", ch);
+
 		for (paf = ch->affected; paf != NULL; paf = paf->next) {
 			sprintf(buf, "Spell: '%s'", skill_table[paf->type].name);
 			send_to_char(buf, ch);
 
 			if (ch->level >= 20) {
-				sprintf(buf, " modifies %s by %d for %d hours",
-								affect_loc_name(paf->location),
-								paf->modifier, paf->duration);
+				sprintf(buf, " modifies %s by %d for %d hours", affect_loc_name(paf->location), paf->modifier, paf->duration);
 				send_to_char(buf, ch);
 			}
 
 			send_to_char(".\n\r", ch);
 		}
 	}
+
 	if (ch->newaffected != NULL) {
 		for (npaf = ch->newaffected; npaf != NULL; npaf = npaf->next) {
 			sprintf(buf, "ZaksBugSpell: '%s'", skill_table[npaf->type].name);
 			send_to_char(buf, ch);
 
 			if (ch->level >= 20) {
-				sprintf(buf, " modifies %s by %d for %d hours",
-								affect_loc_name(npaf->location),
-								npaf->modifier, npaf->duration);
+				sprintf(buf, " modifies %s by %d for %d hours", affect_loc_name(npaf->location), npaf->modifier, npaf->duration);
 				send_to_char(buf, ch);
 			}
 
 			send_to_char(".\n\r", ch);
 		}
 	}
+
+	return;
 }
 
 void do_levels(CHAR_DATA *ch, char *argument)

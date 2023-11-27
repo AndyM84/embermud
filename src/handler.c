@@ -4143,8 +4143,9 @@ AFFECT_DATA *affect_find(AFFECT_DATA *paf, int sn)
 	AFFECT_DATA *paf_find;
 
 	for (paf_find = paf; paf_find != NULL; paf_find = paf_find->next) {
-		if (paf_find->type == sn)
+		if (paf_find->type == sn) {
 			return paf_find;
+		}
 	}
 
 	return NULL;
