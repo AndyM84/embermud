@@ -73,7 +73,7 @@ extern bool can_use(CHAR_DATA *ch, int sn);
 
 char *format_obj_to_char(OBJ_DATA *obj, CHAR_DATA *ch, bool fShort)
 {
-	char *ret;
+	char *ret = "";
 	char buf[MAX_STRING_LENGTH];
 	buf[0] = '\0';
 
@@ -110,6 +110,8 @@ char *format_obj_to_char(OBJ_DATA *obj, CHAR_DATA *ch, bool fShort)
 	if (buf[0] == '\0') {
 		return "\0";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf);
 

@@ -3407,6 +3407,8 @@ char *affect_bit_name(int vector)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 	
 	strcpy(ret, buf + 1);
 
@@ -3497,6 +3499,8 @@ char *extra_bit_name(int extra_flags)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf + 1);
 
@@ -3622,6 +3626,8 @@ char *act_bit_name(int act_flags)
 		return "none";
 	}
 
+	ret = malloc(strlen(buf) + 1);
+
 	strcpy(ret, buf + 1);
 
 	return ret;
@@ -3690,6 +3696,8 @@ char *comm_bit_name(int comm_flags)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf + 1);
 
@@ -3772,6 +3780,8 @@ char *imm_bit_name(int imm_flags)
 		return "none";
 	}
 
+	ret = malloc(strlen(buf) + 1);
+
 	strcpy(ret, buf + 1);
 
 	return ret;
@@ -3831,6 +3841,8 @@ char *wear_bit_name(int wear_flags)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf + 1);
 
@@ -3924,6 +3936,8 @@ char *form_bit_name(int form_flags)
 		return "none";
 	}
 
+	ret = malloc(strlen(buf) + 1);
+
 	strcpy(ret, buf + 1);
 
 	return ret;
@@ -4002,6 +4016,8 @@ char *part_bit_name(int part_flags)
 		return "none";
 	}
 
+	ret = malloc(strlen(buf) + 1);
+
 	strcpy(ret, buf + 1);
 
 	return ret;
@@ -4034,6 +4050,8 @@ char *weapon_bit_name(int weapon_flags)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf + 1);
 
@@ -4112,6 +4130,8 @@ char *off_bit_name(int off_flags)
 	if (buf[0] == '\0') {
 		return "none";
 	}
+
+	ret = malloc(strlen(buf) + 1);
 
 	strcpy(ret, buf + 1);
 
