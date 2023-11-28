@@ -122,10 +122,8 @@ const char wont_suppress_ga_str[] = { IAC, WONT, TELOPT_SGA, '\0' };
 const char echo_off_str[] = { (char)IAC, (char)WILL, TELOPT_ECHO, '\0' };
 const char echo_on_str[] = { (char)IAC, (char)WONT, TELOPT_ECHO, '\0' };
 const char go_ahead_str[] = { (char)IAC, (char)GA, '\0' };
-const char will_suppress_ga_str[] =
-{ (char)IAC, (char)WILL, TELOPT_SGA, '\0' };
-const char wont_suppress_ga_str[] =
-{ (char)IAC, (char)WONT, TELOPT_SGA, '\0' };
+const char will_suppress_ga_str[] = { (char)IAC, (char)WILL, TELOPT_SGA, '\0' };
+const char wont_suppress_ga_str[] = { (char)IAC, (char)WONT, TELOPT_SGA, '\0' };
 #endif
 
 #if	defined(cbuilder)
@@ -146,8 +144,7 @@ int getpeername args((int s, struct sockaddr *name, int *namelen));
 int getsockname args((int s, struct sockaddr *name, int *namelen));
 int gettimeofday args((struct timeval *tp, struct timezone *tzp));
 int listen args((int s, int backlog));
-int setsockopt args((int s, int level, int optname, void *optval,
-										 int optlen));
+int setsockopt args((int s, int level, int optname, void *optval, int optlen));
 int socket args((int domain, int type, int protocol));
 #endif
 
@@ -164,8 +161,7 @@ int getpeername args((int s, void *addr, int *addrlen));
 int getsockname args((int s, void *name, int *addrlen));
 int gettimeofday args((struct timeval *tp, struct timezone *tzp));
 int listen args((int s, int backlog));
-int setsockopt args((int s, int level, int optname,
-										 const void *optval, int optlen));
+int setsockopt args((int s, int level, int optname, const void *optval, int optlen));
 int socket args((int domain, int type, int protocol));
 #endif
 
@@ -180,8 +176,7 @@ int close args((int fd));
 /* int     getsockname     args( ( int s, struct sockaddr *name, int *namelen ) ); */
 /* int gettimeofday args((struct timeval *tp, struct timezone *tzp)); */
 /* int     listen          args( ( int s, int backlog ) ); */
-int select args((int width, fd_set *readfds, fd_set *writefds,
-								 fd_set *exceptfds, struct timeval *timeout));
+int select args((int width, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout));
 int socket args((int domain, int type, int protocol));
 #endif
 
@@ -199,8 +194,7 @@ u_short htons args((u_short hostshort));
 u_long ntohl args((u_long hostlong));
 #endif
 int read args((int fd, char *buf, int nbyte));
-int select args((int width, fd_set *readfds, fd_set *writefds,
-								 fd_set *exceptfds, struct timeval *timeout));
+int select args((int width, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout));
 int write args((int fd, char *buf, int nbyte));
 #endif
 
@@ -220,10 +214,8 @@ int listen args((int s, int backlog));
 u_long ntohl args((u_long hostlong));
 #endif
 int read args((int fd, char *buf, int nbyte));
-int select args((int width, fd_set *readfds, fd_set *writefds,
-								 fd_set *exceptfds, struct timeval *timeout));
-int setsockopt args((int s, int level, int optname, caddr_t optval,
-										 int optlen));
+int select args((int width, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout));
+int setsockopt args((int s, int level, int optname, caddr_t optval, int optlen));
 int socket args((int domain, int type, int protocol));
 int write args((int fd, char *buf, int nbyte));
 #endif
@@ -239,14 +231,11 @@ int getsockname args((int s, struct sockaddr *name, int *namelen));
 int gettimeofday args((struct timeval *tp, struct timezone *tzp));
 int listen args((int s, int backlog));
 int read args((int fd, char *buf, int nbyte));
-int select args((int width, fd_set *readfds, fd_set *writefds,
-								 fd_set *exceptfds, struct timeval *timeout));
+int select args((int width, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout));
 #if defined(SYSV)
-int setsockopt args((int s, int level, int optname,
-										 const char *optval, int optlen));
+int setsockopt args((int s, int level, int optname, const char *optval, int optlen));
 #else
-int setsockopt args((int s, int level, int optname, void *optval,
-										 int optlen));
+int setsockopt args((int s, int level, int optname, void *optval, int optlen));
 #endif
 int socket args((int domain, int type, int protocol));
 int write args((int fd, char *buf, int nbyte));
@@ -262,10 +251,8 @@ int getsockname args((int s, struct sockaddr *name, int *namelen));
 int gettimeofday args((struct timeval *tp, struct timezone *tzp));
 int listen args((int s, int backlog));
 int read args((int fd, char *buf, int nbyte));
-int select args((int width, fd_set *readfds, fd_set *writefds,
-								 fd_set *exceptfds, struct timeval *timeout));
-int setsockopt args((int s, int level, int optname, void *optval,
-										 int optlen));
+int select args((int width, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout));
+int setsockopt args((int s, int level, int optname, void *optval, int optlen));
 int socket args((int domain, int type, int protocol));
 int write args((int fd, char *buf, int nbyte));
 #endif
@@ -638,15 +625,21 @@ int game_loop(int control)
 	#if defined(unix)
 	static struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
+
 	#ifndef SA_RESTART
 	#define SA_RESTART 0
 	#endif
+
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigchld_handler;
-	if (sigaction(SIGCHLD, &sa, 0) < 0)
+
+	if (sigaction(SIGCHLD, &sa, 0) < 0) {
 		return -1;
+	}
+
 	signal(SIGPIPE, SIG_IGN);
 	#endif
+
 	gettimeofday(&last_time, NULL);
 	current_time = (time_t)last_time.tv_sec;
 
@@ -659,8 +652,9 @@ int game_loop(int control)
 		int maxdesc;
 
 		#if defined(MALLOC_DEBUG)
-		if (malloc_verify() != 1)
+		if (malloc_verify() != 1) {
 			abort();
+		}
 		#endif
 
 						/*
@@ -671,6 +665,7 @@ int game_loop(int control)
 		FD_ZERO(&exc_set);
 		FD_SET(control, &in_set);
 		maxdesc = control;
+
 		for (d = descriptor_list; d; d = d->next) {
 			maxdesc = UMAX(maxdesc, d->descriptor);
 			FD_SET(d->descriptor, &in_set);
@@ -678,13 +673,14 @@ int game_loop(int control)
 			FD_SET(d->descriptor, &exc_set);
 		}
 
-		if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) <
-				0) {
+		if (select(maxdesc + 1, &in_set, &out_set, &exc_set, &null_time) < 0) {
 			#if defined(cbuilder)
 			log_string("Error: Game_loop: select: poll");
+			
 			return -1;
 			#else
 			perror("Game_loop: select: poll");
+			
 			exit(1);
 			#endif
 		}
@@ -693,6 +689,7 @@ int game_loop(int control)
 						/* Guess this is as good a place as any for shell reaping? */
 		if (reap_shells) {
 			CHAR_DATA *ch;
+			
 			/* No one in the shell list?  Then don't reap shells anymore! */
 			if (!shell_char_list) {
 				reap_shells = FALSE;
@@ -704,11 +701,11 @@ int game_loop(int control)
 
 					if (can_read_descriptor(ch->fdpair[0])) {
 						close(ch->fdpair[0]);
+
 						if (ch == shell_char_list) {
 							shell_char_list = NULL;
 						} else {
-							for (prev = shell_char_list;
-									 prev && prev->next != ch; prev = prev->next);
+							for (prev = shell_char_list; prev && prev->next != ch; prev = prev->next) { }
 
 							if (prev) {
 								prev->next = ch->next;
@@ -716,41 +713,54 @@ int game_loop(int control)
 								bug("reap_shell: reaped char not found in the shell_char_list", 0);
 							}
 						}
+
 						ch->next = char_list;
 						char_list = ch;
 						ch->next_player = player_list;
 						ch->next_in_shell = NULL;
 						player_list = ch;
+
 						send_to_char("MUD I/O resumed.\n\r", ch);
+
 						ch->desc->connected = CON_PLAYING;
+
 						continue;
 					}
 				}
 			}
 		}
-		#endif
+
+#endif
 
 						/*
 						 * New connection?
 						 */
-		if (FD_ISSET(control, &in_set))
+		if (FD_ISSET(control, &in_set)) {
 			new_descriptor(control);
+		}
 
 	/*
 	 * Kick out the freaky folks.
 	 */
 		for (d = descriptor_list; d != NULL; d = d_next) {
 			d_next = d->next;
+
 			if (FD_ISSET(d->descriptor, &exc_set)) {
 				FD_CLR((unsigned int)d->descriptor, &in_set);
 				FD_CLR((unsigned int)d->descriptor, &out_set);
-				if (d->character && d->character->level > 1)
+				
+				if (d->character && d->character->level > 1) {
 					save_char_obj(d->character);
+				}
+
 				#if defined(cbuilder)
-				if (d->character && d->character->TNode)
+				if (d->character && d->character->TNode) {
 					RemoveUser(d->character);
+				}
 				#endif
+
 				d->outtop = 0;
+
 				close_socket(d);
 			}
 		}
@@ -765,51 +775,69 @@ int game_loop(int control)
 			if (FD_ISSET(d->descriptor, &in_set)) {
 				if (d->character != NULL) {
 					d->character->timer = 0;
-					if (IS_SET(d->character->act, PLR_COLOR))
+					
+					if (IS_SET(d->character->act, PLR_COLOR)) {
 						color = TRUE;
-					else
+					} else {
 						color = FALSE;
-				} else
+					}
+				} else {
 					color = FALSE;
+				}
+
 				if (!read_from_descriptor(d, color)) {
 					FD_CLR((unsigned int)d->descriptor, &out_set);
-					if (d->character != NULL && d->character->level > 1)
+
+					if (d->character != NULL && d->character->level > 1) {
 						save_char_obj(d->character);
+					}
+
 					#if defined(cbuilder)
-					if (d->character && d->character->TNode)
+					if (d->character && d->character->TNode) {
 						RemoveUser(d->character);
+					}
 					#endif
+
 					d->outtop = 0;
+
 					close_socket(d);
+
 					continue;
 				}
 			}
 
 			if (d->character != NULL && d->character->wait > 0) {
 				--d->character->wait;
+				
 				continue;
 			}
 
 			read_from_buffer(d, FALSE);
+
 			if (d->incomm[0] != '\0') {
 				d->fcommand = TRUE;
 				stop_idling(d->character);
 
 				/* OLC */
-				if (d->showstr_point)
+				if (d->showstr_point) {
 					show_string(d, d->incomm);
-				else if (d->pString)
+				} else if (d->pString) {
 					string_add(d->character, d->incomm);
-				else
+				} else {
 					switch (d->connected) {
 					case CON_PLAYING:
-						if (!run_olc_editor(d))
+						if (!run_olc_editor(d)) {
 							substitute_alias(d, d->incomm);
+						}
+
 						break;
+
 					default:
 						nanny(d, d->incomm);
+					
 						break;
 					}
+				}
 
 				d->incomm[0] = '\0';
 			}
@@ -826,15 +854,18 @@ int game_loop(int control)
 		for (d = descriptor_list; d != NULL; d = d_next) {
 			d_next = d->next;
 
-			if ((d->fcommand || d->outtop > 0)
-					&& FD_ISSET(d->descriptor, &out_set)) {
+			if ((d->fcommand || d->outtop > 0) && FD_ISSET(d->descriptor, &out_set)) {
 				if (!process_output(d, TRUE)) {
-					if (d->character != NULL && d->character->level > 1)
+					if (d->character != NULL && d->character->level > 1) {
 						save_char_obj(d->character);
+					}
+
 					#if defined(cbuilder)
-					if (d->character && d->character->TNode)
+					if (d->character && d->character->TNode) {
 						RemoveUser(d->character);
+					}
 					#endif
+
 					d->outtop = 0;
 					close_socket(d);
 				}
@@ -859,15 +890,15 @@ int game_loop(int control)
 			long usecDelta;
 
 			gettimeofday(&now_time, NULL);
-			usecDelta =
-				((int)last_time.tv_usec) - ((int)now_time.tv_usec) +
-				1000000 / PULSE_PER_SECOND;
-			secDelta =
-				((int)last_time.tv_sec) - ((int)now_time.tv_sec);
+			usecDelta = ((int)last_time.tv_usec) - ((int)now_time.tv_usec) + 1000000 / PULSE_PER_SECOND;
+			secDelta = ((int)last_time.tv_sec) - ((int)now_time.tv_sec);
+
 			#if defined(WIN32)
-			if (usecDelta > 0)
+			if (usecDelta > 0) {
 				Sleep(UMIN(usecDelta, 250000) / 1000);
+			}
 			#else
+
 			while (usecDelta < 0) {
 				usecDelta += 1000000;
 				secDelta -= 1;
@@ -883,13 +914,16 @@ int game_loop(int control)
 
 				stall_time.tv_usec = usecDelta;
 				stall_time.tv_sec = secDelta;
+
 				if (select(0, NULL, NULL, NULL, &stall_time) < 0) {
 					#if defined(cbuilder)
 					log_string("Error: Game_loop: select: stall");
+
 					return -1;
 					#else
 					if (errno != EINTR) {
 						perror("Game_loop: select: stall");
+
 						exit(1);
 					}
 
@@ -987,7 +1021,8 @@ void new_descriptor(int control)
 			buf,
 			"%d.%d.%d.%d",
 				(addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
-				(addr >> 8) & 0xFF, (addr) & 0xFF);
+				(addr >> 8) & 0xFF, (addr) & 0xFF
+		);
 
 		sprintf(log_buf, "Sock.sinaddr:  %s", buf);
 		log_string(log_buf);
@@ -997,13 +1032,13 @@ void new_descriptor(int control)
 		 * Documented in config.h
 		 */
 		#ifndef NO_RDNS
-		from = gethostbyaddr((char *)&sock.sin_addr,
-												 sizeof(sock.sin_addr), AF_INET);
-		if (from && (!str_cmp(from->h_name, "ursula.uoregon.edu")
-								 || !str_cmp(from->h_name, "monet.ucdavis.edu")))
+		from = gethostbyaddr((char *)&sock.sin_addr, sizeof(sock.sin_addr), AF_INET);
+
+		if (from && (!str_cmp(from->h_name, "ursula.uoregon.edu") || !str_cmp(from->h_name, "monet.ucdavis.edu"))) {
 			dnew->host = str_dup("white.nextwork.rose-hulman.edu");
-		else
+		}	else {
 			dnew->host = str_dup(from ? from->h_name : buf);
+		}
 		#else
 		dnew->host = str_dup(buf);
 		#endif
@@ -1141,7 +1176,7 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 
 	/* Snarf input. */
 
-	for (;; ) {
+	for (;;) {
 		int nRead;
 		int nBufSize;
 
@@ -1180,8 +1215,10 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 		}
 
 		#if defined(unix)
+
 		else if (errno == EWOULDBLOCK)
 			break;
+
 		#endif
 		else {
 			perror("Read_from_descriptor");
@@ -1191,9 +1228,6 @@ bool read_from_descriptor(DESCRIPTOR_DATA *d, bool color)
 	}
 
 	d->inbuf[iStart] = '\0';
-
-	log_string(d->inbuf);
-	printf("%d\n", strlen(d->inbuf));
 
 	if (bOverflow) {
 		sprintf(log_buf, "%s input overflow!", d->host);
@@ -1212,21 +1246,24 @@ void read_from_buffer(DESCRIPTOR_DATA *d, bool color)
 	int i, j, k;
 
 	/* Don't read from people in shells. */
-	if (d->connected == CON_SHELL)
+	if (d->connected == CON_SHELL) {
 		return;
+	}
 
 /*
  * Hold horses if pending command already.
  */
-	if (d->incomm[0] != '\0')
+	if (d->incomm[0] != '\0') {
 		return;
+	}
 
 /*
  * Look for at least one new line.
  */
 	for (i = 0; d->inbuf[i] != '\n' && d->inbuf[i] != '\r'; i++) {
-		if (d->inbuf[i] == '\0')
+		if (d->inbuf[i] == '\0') {
 			return;
+		}
 	}
 
 	/*
@@ -1234,23 +1271,26 @@ void read_from_buffer(DESCRIPTOR_DATA *d, bool color)
 	 */
 	for (i = 0, k = 0; d->inbuf[i] != '\n' && d->inbuf[i] != '\r'; i++) {
 		if (k >= MAX_INPUT_LENGTH - 2) {
-			write_to_descriptor(d->descriptor, "Line too long.\n\r", 0,
-													color);
+			write_to_descriptor(d->descriptor, "Line too long.\n\r", 0, color);
 
 		 /* skip the rest of the line */
 			for (; d->inbuf[i] != '\0'; i++) {
-				if (d->inbuf[i] == '\n' || d->inbuf[i] == '\r')
+				if (d->inbuf[i] == '\n' || d->inbuf[i] == '\r') {
 					break;
+				}
 			}
+
 			d->inbuf[i] = '\n';
 			d->inbuf[i + 1] = '\0';
+
 			break;
 		}
 
-		if (d->inbuf[i] == '\b' && k > 0)
+		if (d->inbuf[i] == '\b' && k > 0) {
 			--k;
-		else if (isascii(d->inbuf[i]) && isprint(d->inbuf[i]))
+		} else if (isascii(d->inbuf[i]) && isprint(d->inbuf[i])) {
 			d->incomm[k++] = d->inbuf[i];
+		}
 	}
 
 	/*
@@ -1262,45 +1302,24 @@ void read_from_buffer(DESCRIPTOR_DATA *d, bool color)
 
 	d->incomm[k] = '\0';
 
-	/*
-	 * Deal with bozos with #repeat 1000 ...
-	 */
-/*
-		if ( k > 1 || d->incomm[0] == '!' )
-		{
-	if ( d->incomm[0] != '!' && strcmp( d->incomm, d->inlast ) )
-	{
-			d->repeat = 0;
-	}
-	else
-	{
-			if ( ++d->repeat >= 25 )
-			{
-		sprintf( log_buf, "%s input spamming!", d->host );
-		log_string( log_buf );
-		write_to_descriptor( d->descriptor,
-				"\n\r*** PUT A LID ON IT!!! ***\n\r", 0 , color);
-		strcpy( d->incomm, "quit" );
-			}
-	}
-		}
-*/
-
 		/*
 		 * Do '!' substitution.
 		 */
-	if (d->incomm[0] == '!')
+	if (d->incomm[0] == '!') {
 		strcpy(d->incomm, d->inlast);
-	else
+	} else {
 		strcpy(d->inlast, d->incomm);
+	}
 
 /*
  * Shift the input buffer.
  */
-	while (d->inbuf[i] == '\n' || d->inbuf[i] == '\r')
+	while (d->inbuf[i] == '\n' || d->inbuf[i] == '\r') {
 		i++;
-	for (j = 0; (d->inbuf[j] = d->inbuf[i + j]) != '\0'; j++)
-		;
+	}
+
+	for (j = 0; (d->inbuf[j] = d->inbuf[i + j]) != '\0'; j++) { }
+
 	return;
 }
 
@@ -2619,15 +2638,20 @@ void printf_to_char(CHAR_DATA *ch, char *fmt, ...)
  */
 void page_to_char(const char *txt, CHAR_DATA *ch)
 {
-	if (txt == NULL || ch->desc == NULL)
+	if (txt == NULL || ch->desc == NULL) {
 		return;
+	}
 
-	if (ch->desc == NULL)
+	if (ch->desc == NULL) {
 		return;
+	}
+
 	ch->desc->showstr_head = alloc_mem(strlen(txt) + 1);
 	strcpy(ch->desc->showstr_head, txt);
 	ch->desc->showstr_point = ch->desc->showstr_head;
 	show_string(ch->desc, "");
+
+	return;
 }
 
 /* string pager */
@@ -2638,6 +2662,8 @@ void show_string(struct descriptor_data *d, char *input)
 	register char *scan, *chk;
 	int lines = 0, toggle = 1;
 	int show_lines;
+
+	// TODO: I believe this is where our 'Hit Return' bug needs to be addressed  - Andy
 
 	one_argument(input, buf);
 	
