@@ -2663,8 +2663,6 @@ void show_string(struct descriptor_data *d, char *input)
 	int lines = 0, toggle = 1;
 	int show_lines;
 
-	// TODO: I believe this is where our 'Hit Return' bug needs to be addressed  - Andy
-
 	one_argument(input, buf);
 	
 	if (buf[0] != '\0') {
@@ -2691,14 +2689,14 @@ void show_string(struct descriptor_data *d, char *input)
 
 			write_to_buffer(d, buffer, strlen(buffer));
 			
-			for (chk = d->showstr_point; isspace(*chk); chk++) {
-				if (!*chk) {
-					if (d->showstr_head) {
-						free_mem(&d->showstr_head);
-					}
+			for (chk = d->showstr_point; isspace(*chk); chk++) {}
 
-					d->showstr_point = 0;
+			if (!*chk) {
+				if (d->showstr_head) {
+					free_mem(&d->showstr_head);
 				}
+
+				d->showstr_point = 0;
 			}
 
 			return;
