@@ -859,9 +859,9 @@ bool damage(CHAR_DATA *ch, CHAR_DATA *victim, OBJ_DATA *weapon, int dam,
 			}
 		}
 
-		xp = hit_xp_compute(ch, victim, group_levels, members,
-												UMIN(dam, victim->hit + 20));
+		xp = hit_xp_compute(ch, victim, group_levels, members, UMIN(dam, victim->hit + 20));
 		ch->exp_stack += xp;
+		
 		gain_exp(ch, xp);
 	}
 
@@ -1782,23 +1782,35 @@ void stop_fighting(CHAR_DATA *ch, bool fBoth)
 
 	for (fch = char_list; fch != NULL; fch = fch->next) {
 		if (fch == ch || (fBoth && fch->fighting == ch)) {
-			if (fch->exp_stack == 0 && (fch->position != POS_FIGHTING
-																	&& fch->fighting == NULL))
+			if (fch->exp_stack == 0 && (fch->position != POS_FIGHTING && fch->fighting == NULL)) {
 				continue;
+			}
 
 			fch->fighting = NULL;
 			fch->position = IS_NPC(fch) ? ch->default_pos : POS_STANDING;
-			if (fch->exp_stack > 0)
-				sprintf(buf, "`WYou receive %ld experience points.\n\r`w",
-								fch->exp_stack);
-			else
-				sprintf(buf, "`WYou lost %ld experience points.\n\r`w",
-								fch->exp_stack * -1);
 
-			if (!chaos && !gsilentdamage)
+			if (fch->exp_stack > 0) {
+				sprintf(buf, "`WYou receive %ld experience points.\n\r`w", fch->exp_stack);
+
+				if (fch->exp > exp_per_level(fch, fch->pcdata->points)) {
+					sprintf(buf, "%s has made it to level %d!", fch->name, fch->level + 1);
+					log_string(buf);
+					do_sendinfo(fch, buf);
+					send_to_char("You raise a level!!  ", fch);
+					advance_level(fch);
+					fch->level += 1;
+					save_char_obj(fch);
+				}
+			} else {
+				sprintf(buf, "`WYou lost %ld experience points.\n\r`w", fch->exp_stack * -1);
+			}
+
+			if (!chaos && !gsilentdamage) {
 				send_to_char(buf, fch);
+			}
 
 			fch->exp_stack = 0;
+			
 			update_pos(fch);
 		}
 	}

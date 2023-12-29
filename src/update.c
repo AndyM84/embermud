@@ -60,65 +60,73 @@ void advance_level(CHAR_DATA *ch)
 	int add_move;
 	int add_prac;
 
-	ch->pcdata->last_level =
-		(ch->played + (int)(current_time - ch->logon)) / 3600;
-	add_hp =
-		con_app[get_curr_stat(ch, STAT_CON)].hitp +
-		number_range(class_table[ch->Class].hp_min,
-								 class_table[ch->Class].hp_max);
-	add_mana =
-		number_range(2,
-								 (2 * get_curr_stat(ch, STAT_INT) +
-									get_curr_stat(ch, STAT_WIS)) / 5);
-	if (!class_table[ch->Class].fMana)
+	ch->pcdata->last_level = (ch->played + (int)(current_time - ch->logon)) / 3600;
+	
+	add_hp   = con_app[get_curr_stat(ch, STAT_CON)].hitp + number_range(class_table[ch->Class].hp_min, class_table[ch->Class].hp_max);
+	add_mana = number_range(2, (2 * get_curr_stat(ch, STAT_INT) + get_curr_stat(ch, STAT_WIS)) / 5);
+	
+	if (!class_table[ch->Class].fMana) {
 		add_mana /= 2;
-	add_move = number_range(1, (get_curr_stat(ch, STAT_CON)
-															+ get_curr_stat(ch, STAT_DEX)) / 6);
+	}
+
+	add_move = number_range(1, (get_curr_stat(ch, STAT_CON) + get_curr_stat(ch, STAT_DEX)) / 6);
 	add_prac = wis_app[get_curr_stat(ch, STAT_WIS)].practice;
 
-	add_hp = add_hp * 9 / 10;
+	add_hp   = add_hp * 9 / 10;
 	add_mana = add_mana * 9 / 10;
 	add_move = add_move * 9 / 10;
+
 	#ifdef BONUS_INCARNATIONS
-	if (ch->incarnations != 0)
-	{
-		add_hp = add_hp * (1 + (ch->incarnations / 10));
+	if (ch->incarnations != 0) {
+		add_hp   = add_hp * (1 + (ch->incarnations / 10));
 		add_mana = add_mana * (1 + (ch->incarnations / 10));
 		add_move = add_move * (1 + (ch->incarnations / 10));
 	}
 	#endif
-	add_hp = UMAX(1, add_hp);
+
+	add_hp   = UMAX(1, add_hp);
 	add_mana = UMAX(1, add_mana);
 	add_move = UMAX(6, add_move);
 
-	ch->exp -= exp_per_level(ch, ch->pcdata->points);
-	ch->max_hit += add_hp;
+	ch->exp      -= exp_per_level(ch, ch->pcdata->points);
+	ch->max_hit  += add_hp;
 	ch->max_mana += add_mana;
 	ch->max_move += add_move;
 	ch->practice += add_prac;
-	ch->train += 1;
+	ch->train    += 1;
 
-	ch->pcdata->perm_hit += add_hp;
+	ch->pcdata->perm_hit  += add_hp;
 	ch->pcdata->perm_mana += add_mana;
 	ch->pcdata->perm_move += add_move;
 
-	if (!IS_NPC(ch))
+	if (!IS_NPC(ch)) {
 		REMOVE_BIT(ch->act, PLR_BOUGHT_PET);
+	}
 
-	sprintf(buf,
-					"Your gain is: %d/%d hp, %d/%d m, %d/%d mv %d/%d prac.\n\r",
-					add_hp, ch->max_hit,
-					add_mana, ch->max_mana,
-					add_move, ch->max_move, add_prac, ch->practice);
+	sprintf(
+		buf,
+		"Your gain is: %d/%d hp, %d/%d m, %d/%d mv %d/%d prac.\n\r",
+			add_hp,
+			ch->max_hit,
+			add_mana,
+			ch->max_mana,
+			add_move,
+			ch->max_move,
+			add_prac,
+			ch->practice
+	);
+	
 	log_string(buf);
 	send_to_char(buf, ch);
+	
 	return;
 }
 
 void gain_exp(CHAR_DATA *ch, int gain)
 {
-	if (IS_NPC(ch) || ch->level >= LEVEL_HERO)
+	if (IS_NPC(ch) || ch->level >= LEVEL_HERO) {
 		return;
+	}
 
 /* XP tuner here.  Makes it easier for us to adjust how fast people are leveling. -Zane */
 /* Commented out here.  If we modify it here, they see their exp

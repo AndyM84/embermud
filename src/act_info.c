@@ -1887,19 +1887,25 @@ void do_score(CHAR_DATA *ch, char *argument)
 		sprintf(tempbuf, "`G%ld", ch->exp);
 		send_to_char(tempbuf, ch);
 		strcpy(buf, "\0");
-		for (x = 0; x < 47 - strlen(tempbuf) + 2; x++)
+
+		for (x = 0; x < 47 - strlen(tempbuf) + 2; x++) {
 			strcat(buf, " ");
+		}
+
 		send_to_char(buf, ch);
 		strcpy(buf, "\0");
+
 		sprintf(buf, "`y|\n\r     | `YXP to level      ");
 		send_to_char(buf, ch);
-		sprintf(tempbuf, "`G%ld (%d%% of normal for your level)",
-						exp_per_level(ch, ch->pcdata->points) - ch->exp,
-						figure_difference(ch->pcdata->points));
+
+		sprintf(tempbuf, "`G%ld (%d%% of normal for your level)", exp_per_level(ch, ch->pcdata->points) - ch->exp, figure_difference(ch->pcdata->points));
 		send_to_char(tempbuf, ch);
 		strcpy(buf, "\0");
-		for (x = 0; x < 47 - strlen(tempbuf) + 2; x++)
+
+		for (x = 0; x < 47 - strlen(tempbuf) + 2; x++) {
 			strcat(buf, " ");
+		}
+
 		send_to_char(buf, ch);
 		strcpy(buf, "\0");
 		sprintf(buf,
