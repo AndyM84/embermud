@@ -1283,6 +1283,8 @@ void show_string(struct descriptor_data *d, char *input)
 				if (d->showstr_head)
 					free_mem(&d->showstr_head);
 				d->showstr_point = 0;
+
+				d->showstr_point = 0;
 			}
 			return;
 		}

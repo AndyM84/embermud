@@ -1,0 +1,387 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\act_comm.c" />
+    <ClCompile Include="..\act_info.c" />
+    <ClCompile Include="..\act_move.c" />
+    <ClCompile Include="..\act_obj.c" />
+    <ClCompile Include="..\act_wiz.c" />
+    <ClCompile Include="..\auction.c" />
+    <ClCompile Include="..\ban.c" />
+    <ClCompile Include="..\bank.c" />
+    <ClCompile Include="..\bit.c" />
+    <ClCompile Include="..\board.c" />
+    <ClCompile Include="..\clan.c" />
+    <ClCompile Include="..\class.c" />
+    <ClCompile Include="..\comm.c" />
+    <ClCompile Include="..\const.c" />
+    <ClCompile Include="..\db.c" />
+    <ClCompile Include="..\drunk2.c" />
+    <ClCompile Include="..\factions.c" />
+    <ClCompile Include="..\fight.c" />
+    <ClCompile Include="..\handler.c" />
+    <ClCompile Include="..\helpolc.c" />
+    <ClCompile Include="..\interp.c" />
+    <ClCompile Include="..\magic.c" />
+    <ClCompile Include="..\marry.c" />
+    <ClCompile Include="..\mem.c" />
+    <ClCompile Include="..\mprog_commands.c" />
+    <ClCompile Include="..\mprog_procs.c" />
+    <ClCompile Include="..\mud_progs.c" />
+    <ClCompile Include="..\newbits.c" />
+    <ClCompile Include="..\olc.c" />
+    <ClCompile Include="..\olc_act.c" />
+    <ClCompile Include="..\olc_save.c" />
+    <ClCompile Include="..\pty.c" />
+    <ClCompile Include="..\random.c" />
+    <ClCompile Include="..\recycle.c" />
+    <ClCompile Include="..\remort.c" />
+    <ClCompile Include="..\route_io.c" />
+    <ClCompile Include="..\save.c" />
+    <ClCompile Include="..\skills.c" />
+    <ClCompile Include="..\socialolc.c" />
+    <ClCompile Include="..\ssm.c" />
+    <ClCompile Include="..\string.c" />
+    <ClCompile Include="..\todoolc.c" />
+    <ClCompile Include="..\update.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\board.h" />
+    <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\db.h" />
+    <ClInclude Include="..\factions.h" />
+    <ClInclude Include="..\interp.h" />
+    <ClInclude Include="..\magic.h" />
+    <ClInclude Include="..\merc.h" />
+    <ClInclude Include="..\mud_progs.h" />
+    <ClInclude Include="..\newbits.h" />
+    <ClInclude Include="..\olc.h" />
+    <ClInclude Include="..\recycle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ember.cfg" />
+    <None Include="..\formatcode" />
+    <None Include="..\Makefile" />
+    <None Include="..\startup" />
+    <None Include="..\stripcr" />
+    <None Include="..\..\doc\EmberAreaFormat.pdf">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\EmberMUD.license">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\MOBProg.DOC">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\MOBProg.trigger.DOC">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\raffect.DOC">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\README.merc">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\README.rom">
+      <Filter>Resources\doc</Filter>
+    </None>
+    <None Include="..\..\doc\old\license.diku">
+      <Filter>Resources\doc\old</Filter>
+    </None>
+    <None Include="..\..\doc\old\license.merc">
+      <Filter>Resources\doc\old</Filter>
+    </None>
+    <None Include="..\..\doc\old\license.rom">
+      <Filter>Resources\doc\old</Filter>
+    </None>
+    <None Include="..\..\doc\old\rom.credits">
+      <Filter>Resources\doc\old</Filter>
+    </None>
+    <None Include="..\..\area\air.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\arachnos.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\area.lst">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\caedemon.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\canyon.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\catacomb.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\chapel.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\clans.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\daycare.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\draconia.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\dream.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\drow.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\dwarven.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\dylan.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\eastern.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\factions.dat">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\galaxy.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\gnome.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\grave.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\grove.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\haon.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\help.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\hitower.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\hood.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\immort.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\limbo.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\mahntor.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\marsh.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\mega1.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\midennir.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\midgaard.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\mirror.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\mobfact.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\moria.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\MudProgs.prg">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\newthalos.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\nirvana.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\ofcol.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\ofcol2.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\olympus.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\plains.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\redferne.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\school.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\sewer.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\shire.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\smurf.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\social.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\TEMP">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\thalos.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\trollden.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\valley.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\area\wyvern.are">
+      <Filter>Resources\area</Filter>
+    </None>
+    <None Include="..\..\clan\clan.dir">
+      <Filter>Resources\clan</Filter>
+    </None>
+    <None Include="..\..\classes\Cleric">
+      <Filter>Resources\classes</Filter>
+    </None>
+    <None Include="..\..\classes\Mage">
+      <Filter>Resources\classes</Filter>
+    </None>
+    <None Include="..\..\classes\Thief">
+      <Filter>Resources\classes</Filter>
+    </None>
+    <None Include="..\..\classes\Warrior">
+      <Filter>Resources\classes</Filter>
+    </None>
+    <None Include="..\..\gods\gods.dir">
+      <Filter>Resources\gods</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{4dd61b26-953b-45ed-a53d-c1add0f981ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\area">
+      <UniqueIdentifier>{83331f5a-838c-47a3-bc3a-4926e18870b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\clan">
+      <UniqueIdentifier>{8a8e53a0-ce10-43ba-a682-8658db0ffc59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\classes">
+      <UniqueIdentifier>{fbfb8e8c-99f4-4c9a-8516-37d225296941}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\doc">
+      <UniqueIdentifier>{2116de1f-cf14-4037-b5a6-b41e925b4f65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\gods">
+      <UniqueIdentifier>{b2a942d9-eec7-4dda-aaac-4af92aa370f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\notes">
+      <UniqueIdentifier>{77ca9a92-1fe8-4803-8b3e-22a37cfa6e3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\player">
+      <UniqueIdentifier>{224e0e96-dbc3-43e5-9852-7deed11a2fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\doc\design">
+      <UniqueIdentifier>{f5720420-6e24-4f59-bd30-967c8fbe6e04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\doc\old">
+      <UniqueIdentifier>{3756edfc-eaf7-45ad-8d18-c4a302919b3e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\doc\addcomm.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\addrace.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\clan-doc.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\crlffix.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\factions-doc.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\progvars.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\random.txt">
+      <Filter>Resources\doc</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\act.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\area.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\class.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\command.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\contrib.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\drool.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\hacker.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\memory.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\new.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\pfile.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\port.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\security.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\sites.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\skill.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\sky.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\old\trad.txt">
+      <Filter>Resources\doc\old</Filter>
+    </Text>
+    <Text Include="..\..\doc\design\resets.txt">
+      <Filter>Resources\doc\design</Filter>
+    </Text>
+    <Text Include="..\..\area\socials.txt">
+      <Filter>Resources\area</Filter>
+    </Text>
+    <Text Include="..\..\area\todo.txt">
+      <Filter>Resources\area</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
