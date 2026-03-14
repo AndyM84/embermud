@@ -602,6 +602,7 @@ char *str_dup args( ( const char *str ) );
 void free_string args( ( char **pstr ) );
 char *fread_string args( ( FILE *fp ) );
 void init_string_space args( ( void ) );
+void boot_done args( ( void ) );
 
 /* random.c */
 void init_mm args( ( void ) );

@@ -69,6 +69,18 @@ char bug_file[256];
  */
 void    create_minimal_world    args( ( void ) );
 void    create_basic_helps      args( ( void ) );
+void    load_area_files         args( ( void ) );
+void    load_area_file          args( ( char *filename ) );
+void    load_rooms              args( ( FILE *fp ) );
+void    load_helps              args( ( FILE *fp ) );
+void    fix_exits               args( ( void ) );
+void    skip_section_areadata   args( ( FILE *fp ) );
+void    skip_section_mobiles    args( ( FILE *fp ) );
+void    skip_section_objects    args( ( FILE *fp ) );
+void    skip_section_resets     args( ( FILE *fp ) );
+void    skip_section_shops      args( ( FILE *fp ) );
+void    skip_section_progs      args( ( FILE *fp ) );
+void    skip_section_unknown    args( ( FILE *fp ) );
 
 /*
  * Big mama top level function.
@@ -104,14 +116,32 @@ void boot_db( void )
     bug_file[sizeof(bug_file) - 1]       = '\0';
 
     /*
-     * Create the minimal hardcoded world.
+     * Try loading area files.
      */
-    create_minimal_world();
+    load_area_files();
 
     /*
-     * Create basic help entries.
+     * If no rooms were loaded (missing area.lst or empty), use hardcoded fallback.
      */
-    create_basic_helps();
+    if ( get_room_index( ROOM_VNUM_LIMBO ) == NULL
+    &&   get_room_index( ROOM_VNUM_TEMPLE ) == NULL )
+    {
+        log_string( "No rooms loaded from area files, using hardcoded world." );
+        create_minimal_world();
+    }
+    else
+    {
+        fix_exits();
+    }
+
+    /*
+     * If no help entries were loaded, create basic ones.
+     */
+    if ( help_first == NULL )
+    {
+        log_string( "No help entries loaded from area files, using built-in helps." );
+        create_basic_helps();
+    }
 
     /*
      * Set a default greeting if none was loaded from help files.
@@ -128,6 +158,30 @@ void boot_db( void )
         );
     }
 
+    /*
+     * Log summary and finalize boot.
+     */
+    {
+        int nRooms = 0, nExits = 0, nHelps = 0;
+        ROOM_INDEX_DATA *pRoom;
+        HELP_DATA *pHelp;
+        int iHash, door;
+
+        for ( iHash = 0; iHash < MAX_KEY_HASH; iHash++ )
+            for ( pRoom = room_index_hash[iHash]; pRoom; pRoom = pRoom->next )
+            {
+                nRooms++;
+                for ( door = 0; door < 6; door++ )
+                    if ( pRoom->exit[door] )
+                        nExits++;
+            }
+        for ( pHelp = help_first; pHelp; pHelp = pHelp->next )
+            nHelps++;
+
+        logf_string( "Boot complete: %d rooms, %d exits, %d help entries.", nRooms, nExits, nHelps );
+    }
+
+    boot_done();
     fBootDb = FALSE;
     return;
 }
@@ -528,6 +582,438 @@ void create_basic_helps( void )
         "  quit        - Save and leave the game\n\r"
         "  help <topic>- Get help on a topic\n\r" );
 }
+
+/***************************************************************************
+ *                                                                         *
+ *                        AREA FILE LOADER                                 *
+ *                                                                         *
+ ***************************************************************************/
+
+/*
+ * Load all area files listed in area.lst.
+ * If area.lst is missing, returns silently (boot_db will use fallback).
+ */
+void load_area_files( void )
+{
+    FILE *fpList;
+    char  strsave[512];
+
+    snprintf( strsave, sizeof(strsave), "%s%s", area_dir, "area.lst" );
+
+    if ( ( fpList = fopen( strsave, "r" ) ) == NULL )
+    {
+        logf_string( "load_area_files: %s not found, using hardcoded world.", strsave );
+        return;
+    }
+
+    for ( ; ; )
+    {
+        char *word;
+        char  filename[256];
+
+        word = fread_word( fpList );
+        if ( word[0] == '$' )
+            break;
+
+        sprintf( filename, "%s%s", area_dir, word );
+        load_area_file( filename );
+    }
+
+    fclose( fpList );
+    return;
+}
+
+/*
+ * Load a single area file, dispatching each section.
+ */
+void load_area_file( char *filename )
+{
+    FILE *fp;
+    char  letter;
+    char *word;
+
+    if ( ( fp = fopen( filename, "r" ) ) == NULL )
+    {
+        logf_string( "load_area_file: could not open %s, skipping.", filename );
+        return;
+    }
+
+    for ( ; ; )
+    {
+        letter = fread_letter( fp );
+        if ( letter != '#' )
+        {
+            bug( "load_area_file: # not found in %s.", 0 );
+            break;
+        }
+
+        word = fread_word( fp );
+
+        if ( word[0] == '$' )
+            break;
+        else if ( !str_cmp( word, "AREADATA" ) )  skip_section_areadata( fp );
+        else if ( !str_cmp( word, "HELPS" ) )     load_helps( fp );
+        else if ( !str_cmp( word, "MOBILES" ) )    skip_section_mobiles( fp );
+        else if ( !str_cmp( word, "OBJECTS" ) )    skip_section_objects( fp );
+        else if ( !str_cmp( word, "ROOMS" ) )      load_rooms( fp );
+        else if ( !str_cmp( word, "RESETS" ) )     skip_section_resets( fp );
+        else if ( !str_cmp( word, "SHOPS" ) )      skip_section_shops( fp );
+        else if ( !str_cmp( word, "PROGS" ) )      skip_section_progs( fp );
+        else
+        {
+            logf_string( "load_area_file: unknown section '%s' in %s, skipping.", word, filename );
+            skip_section_unknown( fp );
+        }
+    }
+
+    fclose( fp );
+    return;
+}
+
+/*
+ * Load #ROOMS section from an area file.
+ * Format per room:
+ *   #vnum
+ *   name~
+ *   description~
+ *   area_num room_flags sector_type
+ *   [D<dir> description~ keyword~ locks key dest_vnum]
+ *   [E keyword~ text~]
+ *   S
+ * Terminated by #0.
+ */
+void load_rooms( FILE *fp )
+{
+    ROOM_INDEX_DATA *pRoomIndex;
+
+    for ( ; ; )
+    {
+        sh_int vnum;
+        char   letter;
+        int    door;
+        int    iHash;
+
+        letter = fread_letter( fp );
+        if ( letter != '#' )
+        {
+            bug( "load_rooms: # not found.", 0 );
+            exit( 1 );
+        }
+
+        vnum = fread_number( fp );
+        if ( vnum == 0 )
+            break;
+
+        if ( get_room_index( vnum ) != NULL )
+        {
+            bug( "load_rooms: duplicate vnum %d.", vnum );
+            exit( 1 );
+        }
+
+        pRoomIndex = (ROOM_INDEX_DATA *) alloc_perm( sizeof( *pRoomIndex ) );
+        pRoomIndex->next        = NULL;
+        pRoomIndex->people      = NULL;
+        for ( door = 0; door < 6; door++ )
+            pRoomIndex->exit[door] = NULL;
+        pRoomIndex->vnum        = vnum;
+        pRoomIndex->name        = fread_string( fp );
+        pRoomIndex->description = fread_string( fp );
+        /* area_num */ fread_number( fp );
+        pRoomIndex->room_flags  = fread_flag( fp );
+        pRoomIndex->sector_type = fread_number( fp );
+        pRoomIndex->light       = 0;
+
+        for ( ; ; )
+        {
+            letter = fread_letter( fp );
+
+            if ( letter == 'S' )
+                break;
+
+            if ( letter == 'D' )
+            {
+                EXIT_DATA *pexit;
+                int        locks;
+
+                door = fread_number( fp );
+                if ( door < 0 || door > 5 )
+                {
+                    bug( "load_rooms: bad door %d in vnum %d.", door );
+                    exit( 1 );
+                }
+
+                pexit = (EXIT_DATA *) alloc_perm( sizeof( *pexit ) );
+                pexit->description = fread_string( fp );
+                pexit->keyword     = fread_string( fp );
+                pexit->next        = NULL;
+                locks              = fread_number( fp );
+                pexit->key         = fread_number( fp );
+                pexit->u1.vnum     = fread_number( fp );
+
+                switch ( locks )
+                {
+                case 0:  pexit->exit_info = 0;                                        break;
+                case 1:  pexit->exit_info = EX_ISDOOR;                                break;
+                case 2:  pexit->exit_info = EX_ISDOOR | EX_CLOSED | EX_LOCKED
+                                          | EX_PICKPROOF;                              break;
+                default: pexit->exit_info = EX_ISDOOR | EX_CLOSED | EX_LOCKED;        break;
+                }
+
+                pRoomIndex->exit[door] = pexit;
+            }
+            else if ( letter == 'E' )
+            {
+                /* Extra description — read and discard keyword~ and text~ */
+                fread_string( fp );
+                fread_string( fp );
+            }
+            else
+            {
+                bug( "load_rooms: unknown sub-record '%c' in vnum %d.", letter );
+                exit( 1 );
+            }
+        }
+
+        iHash = pRoomIndex->vnum % MAX_KEY_HASH;
+        pRoomIndex->next = room_index_hash[iHash];
+        room_index_hash[iHash] = pRoomIndex;
+    }
+
+    return;
+}
+
+/*
+ * Load #HELPS section from an area file.
+ * Format: level keyword~\n text~
+ * Terminated by 0 $~
+ */
+void load_helps( FILE *fp )
+{
+    HELP_DATA *pHelp;
+
+    for ( ; ; )
+    {
+        sh_int level;
+        char  *keyword;
+
+        level   = fread_number( fp );
+        keyword = fread_string( fp );
+
+        if ( keyword[0] == '$' )
+            break;
+
+        pHelp          = (HELP_DATA *) alloc_perm( sizeof( *pHelp ) );
+        pHelp->level   = level;
+        pHelp->keyword = keyword;
+        pHelp->text    = fread_string( fp );
+        pHelp->next    = NULL;
+
+        if ( help_first == NULL )
+            help_first = pHelp;
+        if ( help_last != NULL )
+            help_last->next = pHelp;
+        help_last = pHelp;
+
+        if ( !str_cmp( keyword, "GREETING" ) )
+            help_greeting = pHelp->text;
+        if ( !str_cmp( keyword, "ANSIGREET" ) )
+            help_greeting = pHelp->text;
+    }
+
+    return;
+}
+
+/*
+ * After all rooms are loaded, resolve exit vnums to room pointers.
+ */
+void fix_exits( void )
+{
+    ROOM_INDEX_DATA *pRoomIndex;
+    int iHash;
+    int door;
+    int nUnresolved = 0;
+
+    for ( iHash = 0; iHash < MAX_KEY_HASH; iHash++ )
+    {
+        for ( pRoomIndex = room_index_hash[iHash];
+              pRoomIndex != NULL;
+              pRoomIndex = pRoomIndex->next )
+        {
+            for ( door = 0; door < 6; door++ )
+            {
+                EXIT_DATA *pexit = pRoomIndex->exit[door];
+                if ( pexit != NULL )
+                {
+                    sh_int vnum = pexit->u1.vnum;
+                    if ( vnum <= 0 )
+                        pexit->u1.to_room = NULL;
+                    else
+                    {
+                        pexit->u1.to_room = get_room_index( vnum );
+                        if ( pexit->u1.to_room == NULL )
+                        {
+                            logf_string( "fix_exits: room %d exit %d -> vnum %d not found.",
+                                pRoomIndex->vnum, door, vnum );
+                            nUnresolved++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ( nUnresolved > 0 )
+        logf_string( "fix_exits: %d unresolved exit(s).", nUnresolved );
+
+    return;
+}
+
+/*
+ * Skip #AREADATA section (reads words until "End").
+ */
+void skip_section_areadata( FILE *fp )
+{
+    char *word;
+
+    for ( ; ; )
+    {
+        word = fread_word( fp );
+        if ( !str_cmp( word, "End" ) )
+            break;
+        fread_to_eol( fp );
+    }
+
+    return;
+}
+
+/*
+ * Skip #MOBILES or #OBJECTS section (scan for #0).
+ */
+static void skip_section_vnum_list( FILE *fp )
+{
+    signed char c;
+    bool at_hash = FALSE;
+
+    for ( ; ; )
+    {
+        c = getc( fp );
+        if ( c == EOF )
+            break;
+
+        if ( c == '#' )
+        {
+            at_hash = TRUE;
+            continue;
+        }
+
+        if ( at_hash && c == '0' )
+        {
+            /* Peek at next char — must be whitespace/EOF to confirm #0 */
+            signed char next = getc( fp );
+            if ( next == EOF || isspace( next ) )
+            {
+                if ( next != EOF )
+                    ungetc( next, fp );
+                break;
+            }
+            /* Not really #0, keep going */
+        }
+
+        at_hash = FALSE;
+    }
+
+    return;
+}
+
+void skip_section_mobiles( FILE *fp )
+{
+    skip_section_vnum_list( fp );
+}
+
+void skip_section_objects( FILE *fp )
+{
+    skip_section_vnum_list( fp );
+}
+
+/*
+ * Skip #RESETS or #PROGS section (read words until lone "S").
+ */
+static void skip_section_word_until_s( FILE *fp )
+{
+    char *word;
+
+    for ( ; ; )
+    {
+        word = fread_word( fp );
+        if ( word[0] == 'S' && word[1] == '\0' )
+            break;
+        fread_to_eol( fp );
+    }
+
+    return;
+}
+
+void skip_section_resets( FILE *fp )
+{
+    skip_section_word_until_s( fp );
+}
+
+void skip_section_progs( FILE *fp )
+{
+    skip_section_word_until_s( fp );
+}
+
+/*
+ * Skip #SHOPS section (read numbers until 0).
+ */
+void skip_section_shops( FILE *fp )
+{
+    for ( ; ; )
+    {
+        int keeper = fread_number( fp );
+        if ( keeper == 0 )
+            break;
+        fread_to_eol( fp );
+    }
+
+    return;
+}
+
+/*
+ * Skip an unknown section by scanning for the next '#' at start of line
+ * followed by an uppercase letter or '$'.
+ */
+void skip_section_unknown( FILE *fp )
+{
+    signed char c;
+    bool at_line_start = TRUE;
+
+    for ( ; ; )
+    {
+        c = getc( fp );
+        if ( c == EOF )
+            break;
+
+        if ( at_line_start && c == '#' )
+        {
+            signed char next = getc( fp );
+            if ( next == EOF )
+                break;
+            if ( isupper( next ) || next == '$' )
+            {
+                ungetc( next, fp );
+                ungetc( '#', fp );
+                break;
+            }
+            /* Not a section header, keep going */
+        }
+
+        at_line_start = ( c == '\n' || c == '\r' );
+    }
+
+    return;
+}
+
 
 /***************************************************************************
  *                                                                         *
