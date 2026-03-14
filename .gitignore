@@ -1,10 +1,12 @@
-»¿################################################################################
+ï¿½ï¿½################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
 /src/MSVC/.vs/embermud
 /src/MSVC/obj/x64/Debug
 src/*.o
+src/*.exe
+build/
 *.filters
 *.user
 player/
