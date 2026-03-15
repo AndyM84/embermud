@@ -17,9 +17,6 @@
 #define CFG_SAY_SELF   "`GYou say `g'`G$t`g'`0"
 
 /*
- * Connection states for the nanny() state machine.
- */
-/*
  * Shared String Manager (ssm.c) configuration.
  */
 #define MAX_CHUNKS                 80
