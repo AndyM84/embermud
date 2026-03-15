@@ -49,15 +49,16 @@ static void show_exits_to_char args((CHAR_DATA *ch));
  */
 void substitute_alias(DESCRIPTOR_DATA *d, char *input)
 {
-	CHAR_DATA *ch;
 	char arg[MAX_INPUT_LENGTH];
 	char buf[MAX_STRING_LENGTH];
-	int alias;
 
-	ch = d->character;
+	CHAR_DATA *ch = d->character;
+
 	if (ch == NULL || IS_NPC(ch) || ch->pcdata == NULL) {
-		if (ch != NULL)
+		if (ch != NULL) {
 			interpret(ch, input);
+		}
+
 		return;
 	}
 
@@ -65,35 +66,41 @@ void substitute_alias(DESCRIPTOR_DATA *d, char *input)
 	one_argument(input, arg);
 
 	/* Check aliases. */
-	for (alias = 0; alias < MAX_ALIAS; alias++) {
-		if (ch->pcdata->alias[alias] == NULL)
+	for (int alias = 0; alias < MAX_ALIAS; alias++) {
+		if (ch->pcdata->alias[alias] == NULL) {
 			break;
+		}
 
 		if (!str_cmp(arg, ch->pcdata->alias[alias])) {
 			/* Found a match -- substitute. */
-			char *point;
 
-			if (strlen(ch->pcdata->alias_sub[alias])
-				+ strlen(input) > MAX_STRING_LENGTH - 1)
+			if (strlen(ch->pcdata->alias_sub[alias]) + strlen(input) > MAX_STRING_LENGTH - 1)
 			{
 				send_to_char("Alias substitution too long.\n\r", ch);
+
 				return;
 			}
 
 			/* Skip past the first word in the original input. */
-			point = input;
-			while (*point != '\0' && !isspace((int)*point))
+			char *point = input;
+
+			while (*point != '\0' && !isspace((int)*point)) {
 				point++;
-			while (isspace((int)*point))
+			}
+
+			while (isspace((int)*point)) {
 				point++;
+			}
 
 			sprintf(buf, "%s %s", ch->pcdata->alias_sub[alias], point);
 			interpret(ch, buf);
+
 			return;
 		}
 	}
 
 	interpret(ch, input);
+
 	return;
 }
 
@@ -106,11 +113,13 @@ void set_title(CHAR_DATA *ch, char *title)
 
 	if (IS_NPC(ch)) {
 		bug("set_title: NPC.", 0);
+
 		return;
 	}
 
-	if (ch->pcdata == NULL)
+	if (ch->pcdata == NULL) {
 		return;
+	}
 
 	/* Ensure title always starts with a space for clean display. */
 	if (title[0] != ' ') {
@@ -120,6 +129,7 @@ void set_title(CHAR_DATA *ch, char *title)
 
 	free_string(&ch->pcdata->title);
 	ch->pcdata->title = str_dup(title);
+
 	return;
 }
 
@@ -146,20 +156,18 @@ bool check_social(CHAR_DATA *ch, char *command, char *argument)
  */
 static void show_exits_to_char(CHAR_DATA *ch)
 {
-	EXIT_DATA *pexit;
 	char buf[MAX_STRING_LENGTH];
-	int door;
-	bool found;
 
 	sprintf(buf, "`C[Exits:");
 
-	found = FALSE;
-	for (door = 0; door < MAX_DIR; door++) {
-		pexit = ch->in_room->exit[door];
-		if (pexit != NULL && pexit->u1.to_room != NULL
-			&& can_see_room(ch, pexit->u1.to_room))
-		{
+	bool found = FALSE;
+
+	for (int door = 0; door < MAX_DIR; door++) {
+		EXIT_DATA *pexit = ch->in_room->exit[door];
+
+		if (pexit != NULL && pexit->u1.to_room != NULL && can_see_room(ch, pexit->u1.to_room)) {
 			found = TRUE;
+
 			if (IS_SET(pexit->exit_info, EX_CLOSED)) {
 				strcat(buf, " (");
 				strcat(buf, dir_name[door]);
@@ -171,11 +179,13 @@ static void show_exits_to_char(CHAR_DATA *ch)
 		}
 	}
 
-	if (!found)
+	if (!found) {
 		strcat(buf, " none");
+	}
 
 	strcat(buf, "]`0\n\r");
 	send_to_char(buf, ch);
+
 	return;
 }
 
@@ -184,20 +194,18 @@ static void show_exits_to_char(CHAR_DATA *ch)
  */
 static void show_char_to_char(CHAR_DATA *list, CHAR_DATA *ch)
 {
-	CHAR_DATA *rch;
 	char buf[MAX_STRING_LENGTH];
 
-	for (rch = list; rch != NULL; rch = rch->next_in_room) {
-		if (rch == ch)
+	for (CHAR_DATA *rch = list; rch != NULL; rch = rch->next_in_room) {
+		if (rch == ch) {
 			continue;
+		}
 
-		if (!can_see(ch, rch))
+		if (!can_see(ch, rch)) {
 			continue;
+		}
 
-		if (rch->long_descr != NULL && rch->long_descr[0] != '\0'
-			&& rch->position == POS_STANDING
-			&& IS_NPC(rch))
-		{
+		if (rch->long_descr != NULL && rch->long_descr[0] != '\0' && rch->position == POS_STANDING && IS_NPC(rch)) {
 			send_to_char(rch->long_descr, ch);
 		} else {
 			sprintf(buf, "%s%s is here.\n\r",
@@ -221,19 +229,23 @@ void do_look(CHAR_DATA *ch, char *argument)
 {
 	char buf[MAX_STRING_LENGTH];
 
-	if (ch->in_room == NULL)
+	if (ch->in_room == NULL) {
 		return;
+	}
 
-	if (ch->desc == NULL)
+	if (ch->desc == NULL) {
 		return;
+	}
 
 	if (ch->position < POS_SLEEPING) {
 		send_to_char("You can't see anything but stars!\n\r", ch);
+
 		return;
 	}
 
 	if (ch->position == POS_SLEEPING) {
 		send_to_char("You can't see anything, you're sleeping!\n\r", ch);
+
 		return;
 	}
 
@@ -244,16 +256,15 @@ void do_look(CHAR_DATA *ch, char *argument)
 
 		/* Show room description if not brief or not auto-look. */
 		if (argument[0] == '\0' || !IS_SET(ch->comm, COMM_BRIEF)) {
-			if (ch->in_room->description != NULL
-				&& ch->in_room->description[0] != '\0')
-			{
+			if (ch->in_room->description != NULL && ch->in_room->description[0] != '\0') {
 				send_to_char(ch->in_room->description, ch);
 			}
 		}
 
 		/* Auto-exits. */
-		if (IS_SET(ch->act, PLR_AUTOEXIT))
+		if (IS_SET(ch->act, PLR_AUTOEXIT)) {
 			show_exits_to_char(ch);
+		}
 
 		/* Show people in the room. */
 		show_char_to_char(ch->in_room->people, ch);
@@ -267,23 +278,21 @@ void do_look(CHAR_DATA *ch, char *argument)
  */
 void do_exits(CHAR_DATA *ch, char *argument)
 {
-	EXIT_DATA *pexit;
 	char buf[MAX_STRING_LENGTH];
-	int door;
-	bool found;
 
-	if (ch->in_room == NULL)
+	if (ch->in_room == NULL) {
 		return;
+	}
 
-	found = FALSE;
+	bool found = FALSE;
 	buf[0] = '\0';
 
-	for (door = 0; door < MAX_DIR; door++) {
-		pexit = ch->in_room->exit[door];
-		if (pexit != NULL && pexit->u1.to_room != NULL
-			&& can_see_room(ch, pexit->u1.to_room))
-		{
+	for (int door = 0; door < MAX_DIR; door++) {
+		EXIT_DATA *pexit = ch->in_room->exit[door];
+
+		if (pexit != NULL && pexit->u1.to_room != NULL && can_see_room(ch, pexit->u1.to_room)) {
 			found = TRUE;
+
 			if (IS_SET(pexit->exit_info, EX_CLOSED)) {
 				printf_to_char(ch, "%-5s - (closed)\n\r",
 					capitalize(dir_name[door]));
@@ -297,8 +306,9 @@ void do_exits(CHAR_DATA *ch, char *argument)
 		}
 	}
 
-	if (!found)
+	if (!found) {
 		send_to_char("None.\n\r", ch);
+	}
 
 	return;
 }
@@ -317,11 +327,13 @@ void do_say(CHAR_DATA *ch, char *argument)
 {
 	if (argument[0] == '\0') {
 		send_to_char("Say what?\n\r", ch);
+
 		return;
 	}
 
 	act_new(CFG_SAY, ch, argument, NULL, TO_ROOM, POS_RESTING);
 	act_new(CFG_SAY_SELF, ch, argument, NULL, TO_CHAR, POS_RESTING);
+
 	return;
 }
 
@@ -331,31 +343,32 @@ void do_say(CHAR_DATA *ch, char *argument)
 void do_tell(CHAR_DATA *ch, char *argument)
 {
 	char arg[MAX_INPUT_LENGTH];
-	CHAR_DATA *victim;
 
 	argument = one_argument(argument, arg);
 
 	if (arg[0] == '\0' || argument[0] == '\0') {
 		send_to_char("Tell whom what?\n\r", ch);
+
 		return;
 	}
 
-	victim = get_player_world(ch, arg);
+	CHAR_DATA *victim = get_player_world(ch, arg);
+
 	if (victim == NULL) {
 		send_to_char("They aren't here.\n\r", ch);
+
 		return;
 	}
 
 	if (victim->desc == NULL && !IS_NPC(victim)) {
-		act("$N seems to have misplaced $S link...try again later.",
-			ch, NULL, victim, TO_CHAR);
+		act("$N seems to have misplaced $S link...try again later.", ch, NULL, victim, TO_CHAR);
+
 		return;
 	}
 
-	act_new("$n tells you '$t'",
-		ch, argument, victim, TO_VICT, POS_DEAD);
-	printf_to_char(ch, "You tell %s '%s'\n\r",
-		victim->name, argument);
+	act_new("$n tells you '$t'", ch, argument, victim, TO_VICT, POS_DEAD);
+	printf_to_char(ch, "You tell %s '%s'\n\r", victim->name, argument);
+
 	return;
 }
 
@@ -371,8 +384,6 @@ void do_tell(CHAR_DATA *ch, char *argument)
  */
 void do_who(CHAR_DATA *ch, char *argument)
 {
-	DESCRIPTOR_DATA *d;
-	CHAR_DATA *wch;
 	char buf[MAX_STRING_LENGTH];
 	int count;
 
@@ -380,16 +391,19 @@ void do_who(CHAR_DATA *ch, char *argument)
 
 	send_to_char("`W---[ Who is Online ]---`0\n\r", ch);
 
-	for (d = descriptor_list; d != NULL; d = d->next) {
+	for (DESCRIPTOR_DATA *d = descriptor_list; d != NULL; d = d->next) {
 		if (d->connected != CON_PLAYING)
 			continue;
 
-		wch = d->character;
-		if (wch == NULL)
-			continue;
+		CHAR_DATA *wch = d->character;
 
-		if (!can_see(ch, wch))
+		if (wch == NULL) {
 			continue;
+		}
+
+		if (!can_see(ch, wch)) {
+			continue;
+		}
 
 		count++;
 		sprintf(buf, "[%3d] %s%s\n\r",
@@ -404,6 +418,7 @@ void do_who(CHAR_DATA *ch, char *argument)
 
 	printf_to_char(ch, "\n\r%d player%s online.\n\r",
 		count, count == 1 ? "" : "s");
+
 	return;
 }
 
@@ -412,13 +427,13 @@ void do_who(CHAR_DATA *ch, char *argument)
  */
 void do_quit(CHAR_DATA *ch, char *argument)
 {
-	DESCRIPTOR_DATA *d;
-
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	if (ch->position == POS_FIGHTING) {
 		send_to_char("No way! You are fighting.\n\r", ch);
+
 		return;
 	}
 
@@ -429,11 +444,12 @@ void do_quit(CHAR_DATA *ch, char *argument)
 
 	save_char_obj(ch);
 
-	d = ch->desc;
+	DESCRIPTOR_DATA *d = ch->desc;
 	extract_char(ch, TRUE);
 
-	if (d != NULL)
+	if (d != NULL) {
 		close_socket(d);
+	}
 
 	return;
 }
@@ -443,11 +459,13 @@ void do_quit(CHAR_DATA *ch, char *argument)
  */
 void do_save(CHAR_DATA *ch, char *argument)
 {
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
 
 	save_char_obj(ch);
 	send_to_char("Saved.\n\r", ch);
+
 	return;
 }
 
@@ -456,41 +474,42 @@ void do_save(CHAR_DATA *ch, char *argument)
  */
 void do_help(CHAR_DATA *ch, char *argument)
 {
-	HELP_DATA *pHelp;
-	BUFFER *output;
-	bool found;
-
 	if (argument[0] == '\0')
 		argument = "summary";
 
-	output = new_buf();
-	found = FALSE;
+	BUFFER *output = new_buf();
+	bool found = FALSE;
 
-	for (pHelp = help_first; pHelp != NULL; pHelp = pHelp->next) {
-		if (pHelp->level > get_trust(ch))
+	for (HELP_DATA *pHelp = help_first; pHelp != NULL; pHelp = pHelp->next) {
+		if (pHelp->level > get_trust(ch)) {
 			continue;
+		}
 
 		if (is_name(argument, pHelp->keyword)) {
 			if (pHelp->text != NULL && pHelp->text[0] != '\0') {
 				/*
 				 * Strip leading '.' from help text (old formatting trick).
 				 */
-				if (pHelp->text[0] == '.')
+				if (pHelp->text[0] == '.') {
 					add_buf(output, pHelp->text + 1);
-				else
+				} else {
 					add_buf(output, pHelp->text);
+				}
 			}
 			found = TRUE;
+
 			break;
 		}
 	}
 
-	if (!found)
+	if (!found) {
 		send_to_char("No help on that word.\n\r", ch);
-	else
+	} else {
 		page_to_char(buf_string(output), ch);
+	}
 
 	free_buf(output);
+
 	return;
 }
 
@@ -506,37 +525,38 @@ void do_help(CHAR_DATA *ch, char *argument)
  */
 static void move_char(CHAR_DATA *ch, int door)
 {
-	EXIT_DATA *pexit;
-	ROOM_INDEX_DATA *in_room;
-	ROOM_INDEX_DATA *to_room;
-
-	if (ch->in_room == NULL)
+	if (ch->in_room == NULL) {
 		return;
+	}
 
 	if (door < 0 || door >= MAX_DIR) {
 		bug("move_char: bad door %d.", door);
+
 		return;
 	}
 
-	in_room = ch->in_room;
-	pexit   = in_room->exit[door];
+	ROOM_INDEX_DATA *in_room = ch->in_room;
+	EXIT_DATA *pexit = in_room->exit[door];
 
 	if (pexit == NULL || pexit->u1.to_room == NULL) {
 		send_to_char("Alas, you cannot go that way.\n\r", ch);
+
 		return;
 	}
 
-	to_room = pexit->u1.to_room;
+	ROOM_INDEX_DATA *to_room = pexit->u1.to_room;
 
 	/* Check for closed door. */
 	if (IS_SET(pexit->exit_info, EX_CLOSED)) {
 		act("The $d is closed.", ch, NULL, pexit->keyword, TO_CHAR);
+
 		return;
 	}
 
 	/* Check for private room. */
 	if (room_is_private(to_room)) {
 		send_to_char("That room is private right now.\n\r", ch);
+
 		return;
 	}
 
@@ -559,35 +579,41 @@ static void move_char(CHAR_DATA *ch, int door)
 void do_north(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_NORTH);
+
 	return;
 }
 
 void do_east(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_EAST);
+
 	return;
 }
 
 void do_south(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_SOUTH);
+
 	return;
 }
 
 void do_west(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_WEST);
+
 	return;
 }
 
 void do_up(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_UP);
+
 	return;
 }
 
 void do_down(CHAR_DATA *ch, char *argument)
 {
 	move_char(ch, DIR_DOWN);
+
 	return;
 }
