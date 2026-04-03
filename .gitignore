@@ -18,3 +18,7 @@ src/ember
 .idea/
 ember
 *.exe
+
+player/*
+!player/player.dir
+!player/temp/
