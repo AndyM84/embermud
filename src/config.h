@@ -39,14 +39,14 @@
  * Configurable directory and file paths.
  * These can be overridden in the config file.
  */
-#define CFG_AREA_DIR      "../area/"
-#define CFG_PLAYER_DIR    "../player/"
-#define CFG_PLAYER_TEMP   "../player/temp.tmp"
-#define CFG_LOG_DIR       "../log/"
-#define CFG_HELP_FILE     "help.txt"
-#define CFG_BUG_FILE      "../log/bugs.txt"
-#define CFG_TYPO_FILE     "../log/typos.txt"
-#define CFG_SHUTDOWN_FILE "../area/shutdown.txt"
+#define CFG_AREA_DIR      "./area/"
+#define CFG_PLAYER_DIR    "./player/"
+#define CFG_PLAYER_TEMP   "./player/temp.tmp"
+#define CFG_LOG_DIR       "./log/"
+#define CFG_HELP_FILE     "help.area"
+#define CFG_BUG_FILE      "./log/bugs.txt"
+#define CFG_TYPO_FILE     "./log/typos.txt"
+#define CFG_SHUTDOWN_FILE "./area/shutdown.txt"
 
 /*
  * Runtime-configurable paths (set by load_config_file).
