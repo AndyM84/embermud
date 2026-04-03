@@ -39,8 +39,10 @@
 #endif
 
 /* system calls */
+#if !defined(WIN32)
 int unlink(  );
 int system(  );
+#endif
 
 /*
  * Short scalar types.

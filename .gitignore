@@ -17,3 +17,4 @@ src/ember
 .claude/
 .idea/
 ember
+*.exe

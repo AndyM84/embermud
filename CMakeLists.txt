@@ -21,11 +21,16 @@ add_executable(ember
 
 target_include_directories(ember PRIVATE src)
 
+# Add Win32 compatibility sources
+if(WIN32)
+    target_sources(ember PRIVATE src/Win32Common/win32util.c)
+endif()
+
 #
 # Compiler-specific flags
 #
 if(MSVC)
-    target_compile_options(ember PRIVATE /W3 /Zi /O2)
+    target_compile_options(ember PRIVATE /W3 /Zi $<$<CONFIG:Release>:/O2>)
     # Suppress common MSVC warnings for legacy C code
     target_compile_definitions(ember PRIVATE
         _CRT_SECURE_NO_WARNINGS
