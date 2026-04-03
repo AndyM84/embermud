@@ -44,5 +44,10 @@ if(WIN32)
     target_link_libraries(ember PRIVATE ws2_32)
 else()
     target_compile_definitions(ember PRIVATE LINUX)
-    target_link_libraries(ember PRIVATE m)
+    target_link_libraries(ember PRIVATE m crypt)
 endif()
+
+# Copy the executable to the project root after building
+add_custom_command(TARGET ember POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ember> ${CMAKE_SOURCE_DIR}
+)
